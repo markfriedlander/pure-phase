@@ -1,6 +1,25 @@
 # Pure Phase — App Store Submission State
 
-*Authoritative state of the in-progress App Store Connect submission for Pure Phase 1.0. Updated whenever Mark and CC pause or resume the flow. If a CC session loses conversation context (compaction, etc.), this doc is the recovery point.*
+*Pure Phase 1.0 was submitted to Apple's review queue on May 7, 2026. This doc now records the final state of every section + lessons learned. Keep it for the 1.0.1 (or any future) submission — it captures the gotchas that aren't obvious from Apple's UI.*
+
+## Final status: SUBMITTED ✅
+
+- Submitted at: May 7, 2026
+- Build: 1.0 (1) — uploaded via Xcode Archive → Distribute App → App Store Connect → Upload
+- Expected review window: 24–72 hours
+- Auto-release on approval (default)
+
+## 1.0.1 cleanup punch list (from this submission)
+
+These are small things that surfaced during submission. None blocked 1.0; all worth doing before 1.0.1.
+
+- **Add `ITSAppUsesNonExemptEncryption = false` to Info.plist.** Apple's modal even told us: setting this in Info.plist skips the encryption questionnaire on every future submission. The app uses zero encryption (no network calls in production) so this is factually safe.
+- **Resolve the 3 build warnings.** Mark saw 3 warnings during Archive. Identify and fix before 1.0.1 — clean baseline for the next submission. (Capture warning text from Xcode's Issue Navigator.)
+- **Consider whether to re-capture iPhone screenshots at 1284×2778 native** rather than capturing 1320×2868 and downsampling (we resized via `sips -z 2778 1284` for this submission — see `scripts/capture_screenshots.sh` header). Apple's iPhone slot still labels itself "6.5\" Display" and rejects 1320×2868. If this is still true at 1.0.1, change the Simulator target in `capture_screenshots.sh` to a device whose native screenshot size is 1284×2778.
+
+---
+
+
 
 ---
 
@@ -21,59 +40,50 @@ Apple Developer membership expires in **22 days** from May 2026 (per the develop
 
 ---
 
-## Submission progress checklist
+## Submission checklist — all done
 
-### Done
-- [x] Apple Developer License Agreement re-accepted (was blocking new app creation)
-- [x] App ID `com.MarkFriedlander.PurePhase` registered at developer.apple.com (Description: "Pure Phase", Explicit, no special capabilities)
-- [x] App Store Connect "New App" listing created (Pure Phase / iOS / English (U.S.) / SKU purephase / Full Access)
-- [x] App Information → Primary Category: **Health & Fitness**
-- [x] App Information → Secondary Category: **Lifestyle**
-- [x] App Information → Subtitle: **"Breathe. Focus. Calm. Sleep."** (28 chars — order matches the home-tile order Mark chose)
-- [x] (Saved to App Store Connect)
+| Section | Final value |
+|---|---|
+| Developer License Agreement | re-accepted |
+| App ID registration | `com.MarkFriedlander.PurePhase` (developer.apple.com) |
+| App Store Connect listing | created (Pure Phase / iOS / SKU `purephase` / Full Access) |
+| Primary Category | Health & Fitness |
+| Secondary Category | Lifestyle |
+| Subtitle | "Breathe. Focus. Calm. Sleep." (28 chars) |
+| Content Rights | No (third-party content) |
+| App Privacy | Data Not Collected (published) |
+| Pricing | Free, 175 countries/regions |
+| Apple Silicon Mac availability | enabled (Automatic, macOS 11.0) |
+| Description | Strategic Claude's verbatim text — see drafted copy below |
+| Keywords | `brainwave,entrainment,focus,sleep,calm,meditation,breathwork,isochronic,gamma,alpha,delta,binaural` (99 chars) |
+| Promotional Text | "Free. No subscription. Synchronized light, sound, and breath for focus, calm, and sleep. Tap to begin." |
+| Version | 1.0 |
+| Copyright | 2026 Mark Friedlander |
+| Support URL | https://markfriedlander.github.io/pure-phase/support.html |
+| Privacy Policy URL | https://markfriedlander.github.io/pure-phase/privacy.html |
+| Marketing URL | (skipped — optional) |
+| iPhone screenshots | 4 (resized to 1284×2778 — see gotchas) |
+| iPad screenshots | 2 (2064×2752 native, no resize) |
+| Age Rating | 18+ override (stroboscopic effects / documented seizure risk). On legacy iOS <26 displays as 17+ globally with regional exceptions (A18 Brazil, 19+ Korea). |
+| Regulated Medical Device | No |
+| Build | 1.0 (1) — uploaded via Xcode Archive → Distribute App → App Store Connect → Upload |
+| Encryption (Export Compliance) | None of the algorithms (Pure Phase has no network calls, no custom crypto). 1.0.1 cleanup: add `ITSAppUsesNonExemptEncryption = false` to Info.plist. |
+| Sign-in required (review) | Off (no accounts) |
+| Contact Information | Mark Friedlander / 818-416-5229 / markfriedlander@yahoo.com |
+| Final action | **Add for Review** → submitted May 7, 2026 |
 
-### Pending on App Information page
-- [ ] **Content Rights** — click "Set Up Content Rights Information" → answer "Does your app contain, show, or access third-party content?" → **No** (we synthesize all audio, generate all visuals, no licensed content)
+## Lessons / gotchas to remember next time
 
-### Pending on App Privacy page (sidebar → TRUST & SAFETY → App Privacy)
-- [ ] Privacy Practices questionnaire — for **every category Apple asks about**, the answer is "Not Collected." Pure Phase collects nothing. Reference points:
-  - No analytics, no tracking, no contact info, no health data, no location, no identifiers, no usage data, no diagnostics
-  - The torch uses `AVCaptureDevice` to control hardware only — no image/video data captured
-  - Worth confirming the questionnaire is complete and shows "No data collected."
-
-### Pending on Pricing and Availability (sidebar — somewhere below GROWTH & MARKETING)
-- [ ] Price tier: **Free**
-- [ ] Availability: **All countries and regions** (default)
-- [ ] No pre-orders
-
-### Pending on the version 1.0 Distribution page (the page we landed on first)
-- [ ] **Description** — Strategic Claude's draft, see below. Paste verbatim.
-- [ ] **Keywords** (100 char max, comma-separated) — Strategic Claude's draft (99 chars), see below.
-- [ ] **Promotional Text** (170 chars, changeable any time without resubmission) — Strategic Claude's draft, see below.
-- [ ] **What's New in This Version** — for 1.0, the welcome blurb. See below.
-- [ ] **Support URL** — `https://markfriedlander.github.io/pure-phase/support.html` (already live, HTTP 200 verified)
-- [ ] **Marketing URL** (optional) — same Pages site root or skip
-- [ ] **Privacy Policy URL** — `https://markfriedlander.github.io/pure-phase/privacy.html` (already live, HTTP 200 verified)
-- [ ] **Screenshots** — 6 files in `Docs/AppStoreScreenshots/` (4 iPhone-6.9, 2 iPad-13). Mark's selection from earlier — these are final.
-  - **Gotcha discovered at upload time:** App Store Connect's iPhone slot (labeled "6.5\" Display") REJECTS the native 1320 × 2868 capture. Accepted sizes are 1242 × 2688 (6.5") or 1284 × 2778 (6.7"). iPad 2064 × 2752 WAS accepted as-is.
-  - Workaround used: downsampled the 4 iPhone PNGs to 1284 × 2778 via `sips -z 2778 1284 SRC.png --out resized/SRC.png` (closest match; aspect ratios differ by only ~0.4%, no visible distortion). Output landed in `iphone-6.9/resized/`. Those uploaded cleanly.
-  - Documented in the header of `scripts/capture_screenshots.sh` so the next submission knows.
-- [ ] **App Icon** — comes automatically from the uploaded build's asset catalog. No separate upload needed.
-
-### Pending: Age Rating questionnaire
-- [ ] Set rating to **17+** via Apple's content questionnaire. The reason is stroboscopic effects with documented seizure risk; this matters because it gates unsupervised minor use and aligns with the app's onboarding warning.
-
-### Pending: Build upload (Mark's step, can't be automated)
-- [ ] In Xcode: Product → Archive
-- [ ] Wait for archive to finish (~1–2 min)
-- [ ] Organizer opens automatically with the new archive selected
-- [ ] Click **Distribute App** → **App Store Connect** → **Upload**
-- [ ] Wait ~10–20 min for Apple processing (status visible in App Store Connect → TestFlight or in the version page)
-
-### Pending: Bind build to version 1.0 + final submit
-- [ ] Once build appears as "Ready to Submit" in App Store Connect, attach it to version 1.0 (button in the version's Build section)
-- [ ] Click **Add for Review** → **Submit for Review**
-- [ ] Wait 24–72 hours for Apple review
+1. **iPhone screenshot dimensions** — App Store Connect's iPhone slot is labeled "6.5\" Display" and rejects 1320×2868 (iPhone 17 Pro Max native). Accepted sizes are 1242×2688 or 1284×2778. iPad 2064×2752 is accepted natively. Resize iPhone shots before upload (`sips -z 2778 1284 SRC --out resized/SRC`).
+2. **Apple's age rating tiers** — 17+ no longer exists in the dropdown. The new tiers are 13+ / 16+ / 18+. For seizure-risk gating, **18+** is the right factual override. Apple maps 18+ back to 17+ for legacy iOS versions.
+3. **The "Items required to start review" check is silent** — if you click Add for Review and the page just spins, scroll up: there's a list saying what's missing. Apple won't pop a toast or scroll to the missing field.
+4. **"Sign-in required" defaults to ON** for new submissions. Pure Phase has no accounts; turn it off explicitly or you'll be asked for demo credentials.
+5. **Programmatic input setters don't always commit to React state.** If a section refuses to save after JS-set values, click into a field, type a character, delete it, click Save — that triggers React's onChange and the values stick.
+6. **The Add for Review button requires trusted pointer events.** Programmatic `.click()` and synthesized PointerEvents both fail silently. You have to physically click it.
+7. **Encryption questionnaire pops every submission** unless `ITSAppUsesNonExemptEncryption = false` is in Info.plist. Adding that key skips it forever for an app like ours that uses zero encryption.
+8. **App Privacy "Publish" is a one-way commit** for the version — once published, edits are versioned. Pure Phase's "Data Not Collected" answer is dead simple, but that publish step is required, not optional.
+9. **Apple's renewal flow misbehaves in Safari** — Mark hit this. Chrome worked. If renewal fails in Safari, switch browsers before assuming the issue is your account.
+10. **Don't look at "what's new"** — for 1.0, there's no "What's New in This Version" field on the inflight page. That field only appears on subsequent version submissions.
 
 ---
 
