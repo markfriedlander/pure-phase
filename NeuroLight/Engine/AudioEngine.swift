@@ -393,7 +393,12 @@ final class AudioEngine {
     private enum NoiseKind { case pink, brown }
 
     private func makeNoiseBuffer(_ kind: NoiseKind, format: AVAudioFormat) -> AVAudioPCMBuffer? {
-        let bufferDuration: Double = 10
+        // Buffer length is 30 s rather than 10 s. With looping ambient
+        // noise, any residual loop-boundary artifact (theoretical for
+        // stochastic signals) is at minimum less rhythmic, and at
+        // default settings doesn't coincide with a clean integer
+        // number of breath cycles.
+        let bufferDuration: Double = 30
         let frameCount = AVAudioFrameCount(bufferDuration * sampleRate)
         guard let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: frameCount) else {
             return nil
@@ -428,12 +433,13 @@ final class AudioEngine {
             }
         }
 
-        let fadeFrames = min(2048, total / 4)
-        for i in 0..<fadeFrames {
-            let f = Float(i) / Float(fadeFrames)
-            data[i] *= f
-            data[total - 1 - i] *= f
-        }
+        // No fade-to-zero at edges. A stochastic signal (pink/brown) is
+        // discontinuous between every adjacent pair of samples by
+        // definition — the loop boundary is no different from any other
+        // sample transition, and there is nothing to "smooth into."
+        // The previous fade-to-zero produced an audible ~92 ms volume
+        // dip every loop boundary (Mark heard it on Sleep at the 20th
+        // pulse — 2 Hz × 10 s buffer). Removed.
         return buffer
     }
 
