@@ -252,5 +252,18 @@ ISO 226-2003 inverse equal-loudness-contour-filtered white noise. Strategic Clau
 
 These are intentionally captured here so we don't lose the thinking, but they are explicitly out of scope for v1. Do not implement, scaffold, or design UI around any of these without an explicit green light from Mark.
 
+### Resonance / Drone — sonic-only "wall" mode (Kevin Shields lineage)
+Mark surfaced this late-night, May 2026. Inspired by the famous extended-noise section in My Bloody Valentine's "You Made Me Realise" live performances — sometimes called the "holocaust section" — and the perceptual phenomena it produces (auditory pareidolia / phantom melodies, Tartini difference tones, time-distortion, mild dissociation).
+
+A future Pure Phase mode in the same family as BREATHE — purely auditory, no flicker — that sits next to the existing isochronic-tone work but pursues a different mechanism. Where isochronic tones drive cortical entrainment via amplitude modulation at brainwave frequencies, this mode would pursue **perceptual immersion via sustained spectral mass**:
+
+- Multiple sustained drones, slightly detuned (sub-Hz beating between sources creates slow movement without explicit modulation)
+- Carefully chosen harmonic relationships that produce audible **difference tones** (frequencies your auditory system generates from the interaction of physical inputs that aren't actually present)
+- Slow spectral evolution over minutes — closer in lineage to Eliane Radigue, Phill Niblock, La Monte Young, Ellen Arkbro than to MBV literally (we cannot reproduce 130 dB warehouse volume in a free app — but the perceptual phenomena are partially reachable at safe volumes with headphones)
+- No flicker. Black canvas. Maybe a single very slow visual element.
+- Long sessions (20–60 minutes) — the perceptual effects compound with time.
+
+Out of scope for v1. Worth designing carefully — wrong execution is just unpleasant noise; right execution is genuinely transporting. Lineage is well-documented in drone music; we'd want to study Radigue's three-oscillator approach, Niblock's overtone-cluster technique, and the Tartini tone literature before implementing. Defer to 1.x discussion with Mark.
+
 ### Closed-loop biofeedback entrainment (Apple Watch)
 Apple exposes real-time heart rate streaming to third-party apps via HealthKit during active workout sessions, typically at 1-second resolution. A future version of Pure Phase could use incoming HR and HRV data to modulate flicker frequency and audio in real time — nudging toward Alpha if HR is elevated, holding at target state as HRV improves. The breath guide could adjust its pacing dynamically to meet the user rather than imposing a fixed rhythm. This is closed-loop neurofeedback. It is the right direction for a 2.0 but explicitly out of scope for v1.
