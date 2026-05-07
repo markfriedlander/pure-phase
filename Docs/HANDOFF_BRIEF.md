@@ -176,6 +176,36 @@ These don't block Engine work — flagging only so they're remembered when Views
 
 ---
 
+## Pick up tomorrow morning here
+
+**Mark stopped at end of evening on May 6, 2026 — got tired suddenly. Resuming in the AM.**
+
+State at sign-off:
+- Launch fade-in committed and pushed (1.2 s ease-out from black on cold start of ContentView).
+- `scripts/capture_screenshots.sh` committed and pushed. Captures 4 screens (Home, Advanced, BREATHE config, BREATHE session) at iPhone 6.9" and iPad 13" sizes, with a `*-thumb.png` alongside each via `sips -Z 400`.
+- `Docs/AppStoreScreenshots/` is in `.gitignore` (build artifact, not source of truth).
+- Image-handling rule documented in `CLAUDE.md` and a corresponding decision in `MEMORY.md`. **CC must never read full-size image files; only `*-thumb.png` are safe.**
+- Screenshot script was running in the background when Mark signed off — **stopped cleanly with `TaskStop`** before sign-off so nothing keeps the simulator running overnight. Output may or may not be complete in `Docs/AppStoreScreenshots/iphone-6.9/` depending on how far it got.
+- All commits pushed to `https://github.com/markfriedlander/pure-phase` through `cb9abd4`.
+
+### First thing tomorrow
+
+1. Re-run `scripts/capture_screenshots.sh` from a clean state to get a complete set of screenshots, OR check what's already in `Docs/AppStoreScreenshots/` and only re-capture missing pieces.
+2. Mark reviews the full-size PNGs in Finder — confirms they look right.
+3. Move to App Store Connect submission (Chrome MCP browser automation for the form, Xcode Organizer for the build upload).
+
+Three deferred-to-1.1 items (logged in MEMORY "Known Polish Issues") are still on hold:
+- Halo stutter at breath cycle peaks
+- 40 Hz Focus pattern change on 60 Hz displays
+- Grey noise ambient option
+
+Three deferred-to-1.0-finish items still owed by Mark on real hardware:
+- Sleep mode in a dark room with torch on
+- 40-minute Open mode end-to-end
+- Mac Catalyst window behavior
+
+---
+
 ## Last Updated
 May 2026 — **Session 7: Renamed to Pure Phase. GitHub repo and Pages live.**
 
