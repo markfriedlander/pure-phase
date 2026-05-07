@@ -1,4 +1,4 @@
-# NEXT.md — NeuroLight Current Priorities
+# NEXT.md — Pure Phase Current Priorities
 *Always reflects current planned work. A stale NEXT.md is worse than none. Update every session.*
 
 ---

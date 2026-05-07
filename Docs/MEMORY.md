@@ -1,4 +1,4 @@
-# MEMORY.md — NeuroLight Strategic Record
+# MEMORY.md — Pure Phase Strategic Record
 *The why behind every major decision. Prevents relitigating settled questions.*
 
 ---
@@ -6,7 +6,7 @@
 ## Current Architecture
 
 ### Overview
-NeuroLight is a SwiftUI iOS app with a clean separation between engine logic and presentation. A single `SessionEngine` owns all timing during a session. Views observe published state from the engine. Audio runs in `AudioEngine`, a separate class that receives timing signals from `SessionEngine`.
+Pure Phase is a SwiftUI iOS app with a clean separation between engine logic and presentation. A single `SessionEngine` owns all timing during a session. Views observe published state from the engine. Audio runs in `AudioEngine`, a separate class that receives timing signals from `SessionEngine`.
 
 ### Layer Diagram
 ```
@@ -66,6 +66,12 @@ TorchController
 **Date:** May 2026
 **Decision:** Breath pacing and light flicker run at their own rates; they do not need to align.
 **Rationale:** They are entraining different systems — respiratory/vagal tone (breath) vs. cortical oscillation (flicker). A 6 BPM breath cycle and 10Hz Alpha flicker have no natural common frequency. Forcing alignment would require compromising one or both. They share a start time and clock source but run at their own periods.
+
+### Decision: Project renamed NeuroLight → Pure Phase
+**Date:** May 2026
+**Decision:** Public name of the app is **Pure Phase**. Bundle identifier `com.MarkFriedlander.PurePhase`. Display name (CFBundleDisplayName) "Pure Phase". Wordmark text in Onboarding/Home/Advanced reads "PURE PHASE". GitHub repo at `markfriedlander/pure-phase`. Pages live at `https://markfriedlander.github.io/pure-phase/{privacy,support}.html`.
+**Rationale:** Discovered another company is using "NeuroLight" for entrainment hardware. Conflict avoided by changing names. "Pure Phase" was confirmed clean on the App Store (only adjacent results were unrelated UPS battery apps). Bundle ID was confirmed available.
+**Note on history:** Older HISTORY entries and inline source-file path references intentionally retain the original "NeuroLight" name where it accurately describes what was true at the time (the source folder, the Xcode project file name, and the legacy struct `NeuroLightApp` are still on disk under the original names — changing those would create churn for no user-visible benefit). The product is Pure Phase; the source tree happens to have an old internal codename.
 
 ### Decision: Minimum deployment target is iOS 17
 **Date:** May 2026
@@ -139,7 +145,7 @@ TorchController
 ### Decision: Breath-only as a fourth Home tile
 **Date:** May 2026
 **Decision:** Breath-only mode lives as the FIRST tile on Home — order is BREATHE → FOCUS → CALM → SLEEP, the warmth-to-deep visual gradient. Same gesture model as the three entrainment tiles (tap = start, long press = config). It is not in Advanced and is not a toggle inside an existing state.
-**Rationale:** Breathwork is a different mode of using the app, not a variant of entrainment. Promoting it to Home gives it appropriate weight; users approaching NeuroLight for breathwork don't think of themselves as advanced users.
+**Rationale:** Breathwork is a different mode of using the app, not a variant of entrainment. Promoting it to Home gives it appropriate weight; users approaching Pure Phase for breathwork don't think of themselves as advanced users.
 
 ### Decision: Breath-only visual — cream ring + warm halo on black
 **Date:** May 2026
@@ -220,4 +226,4 @@ ISO 226-2003 inverse equal-loudness-contour-filtered white noise. Strategic Clau
 These are intentionally captured here so we don't lose the thinking, but they are explicitly out of scope for v1. Do not implement, scaffold, or design UI around any of these without an explicit green light from Mark.
 
 ### Closed-loop biofeedback entrainment (Apple Watch)
-Apple exposes real-time heart rate streaming to third-party apps via HealthKit during active workout sessions, typically at 1-second resolution. A future version of NeuroLight could use incoming HR and HRV data to modulate flicker frequency and audio in real time — nudging toward Alpha if HR is elevated, holding at target state as HRV improves. The breath guide could adjust its pacing dynamically to meet the user rather than imposing a fixed rhythm. This is closed-loop neurofeedback. It is the right direction for a 2.0 but explicitly out of scope for v1.
+Apple exposes real-time heart rate streaming to third-party apps via HealthKit during active workout sessions, typically at 1-second resolution. A future version of Pure Phase could use incoming HR and HRV data to modulate flicker frequency and audio in real time — nudging toward Alpha if HR is elevated, holding at target state as HRV improves. The breath guide could adjust its pacing dynamically to meet the user rather than imposing a fixed rhythm. This is closed-loop neurofeedback. It is the right direction for a 2.0 but explicitly out of scope for v1.

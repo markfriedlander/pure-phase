@@ -1,11 +1,11 @@
-# CLAUDE.md — NeuroLight Operational Reference
+# CLAUDE.md — Pure Phase Operational Reference
 *Read this at the start of every session. Every session. No exceptions.*
 
 ---
 
 ## What This Project Is
 
-NeuroLight is a free iOS app that uses synchronized light flicker, isochronic audio tones, and breath pacing to guide users into specific mental states — focus, calm, and sleep. It is a science-grounded tool, not a wellness content platform. There is no narration, no subscriptions, no accounts, no content library. Think: Lumenate, but free, minimal, and honest about what it is.
+Pure Phase is a free iOS app that uses synchronized light flicker, isochronic audio tones, and breath pacing to guide users into specific mental states — focus, calm, and sleep. It is a science-grounded tool, not a wellness content platform. There is no narration, no subscriptions, no accounts, no content library. Think: Lumenate, but free, minimal, and honest about what it is.
 
 The aesthetic is dark and atmospheric — inspired by the William Gibson "Virtual Light" book cover. Warm amber-to-red spectrum light on near-total black. Sparse. Industrial headers, soft body text, slow deliberate motion.
 
@@ -148,5 +148,5 @@ Advanced states (Theta, SMR, Psychedelic, Void, Custom) are behind the Advanced 
 
 ---
 
-*NeuroLight — Version 1.0 spec, May 2026.*
+*Pure Phase — Version 1.0 spec, May 2026.*
 *Written in collaboration between Mark and Strategic Claude.*

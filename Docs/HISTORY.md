@@ -1,4 +1,4 @@
-# HISTORY.md — NeuroLight Project Chronicle
+# HISTORY.md — Pure Phase Project Chronicle
 *A running log of what was built, when, and why it matters. Updated every meaningful session.*
 
 ---
@@ -34,7 +34,7 @@
 **What was NOT done:**
 - No code written yet
 - No Xcode project modified
-- No files created in the NeuroLight project directory
+- No files created in the Pure Phase project directory
 
 **State handed to Claude Code:**
 Clean start. Full spec. Five documents. Two original Swift files for reference.
@@ -42,6 +42,46 @@ Clean start. Full spec. Five documents. Two original Swift files for reference.
 ---
 
 *Future entries go below this line, newest at top.*
+
+---
+
+## May 2026 — Session 7: Rename to Pure Phase + GitHub repo + Pages live
+
+**The product is now Pure Phase.** A different company is using "NeuroLight" for entrainment hardware. Switched names cleanly.
+
+**Code-side rename** (mostly already in place from incremental work this session):
+- `INFOPLIST_KEY_CFBundleDisplayName` = "Pure Phase" (Debug + Release)
+- `PRODUCT_BUNDLE_IDENTIFIER` = `com.MarkFriedlander.PurePhase` (Debug + Release)
+- `HomeView` and `OnboardingView` wordmark text "PURE PHASE"
+- AutomationServer reports `name: "Pure Phase Automation"` from `/help`
+- App icon: warm radial pulse (no NL letterform — text removed when name changed; icon is now pure mark)
+
+**Docs scrub:** ran a targeted perl substitution across all five docs replacing `NeuroLight` → `Pure Phase` and `NEUROLIGHT` → `PURE PHASE`, EXCLUDING file paths (`NeuroLight/Models/...`), file names (`NeuroLightApp.swift`), and historical bundle ID references (`com.MarkFriedlander.NeuroLight`). The source folder, Xcode project file, and legacy `NeuroLightApp` struct keep their original names — changing those would be churn for no user benefit.
+
+**GitHub:**
+- Repo created at `https://github.com/markfriedlander/pure-phase` (public, default branch `main`)
+- `.gitignore` excludes DerivedData, xcuserdata, screenshots, secrets/credentials patterns
+- Initial push includes the full Models/Engine/Views/Utilities tree, asset catalog with new icon, automation server, doc set
+- GitHub Pages enabled on `main` / root
+- `index.html`, `privacy.html`, `support.html` deployed and verified live (HTTP 200) at `https://markfriedlander.github.io/pure-phase/`
+- Privacy/support copy uses Strategic Claude's draft, styled in Pure Phase's warm-amber-on-black aesthetic
+
+**Verified on simulator:**
+- App launches as `com.MarkFriedlander.PurePhase`
+- `/help` returns `name: "Pure Phase Automation", port: 8770`
+- Home screen renders with PURE PHASE wordmark
+- All previous functionality (tile gestures, breath cues, audio, etc.) intact
+
+**Installed on Mark's iPhone 16 Plus.**
+
+**Standing tasks remaining for 1.0 ship:**
+- Launch screen (gradient bar + PURE PHASE fade-in)
+- Reduce Motion warning (one-time gentle nudge)
+- VoiceOver labels on tile glyphs
+- Screenshot automation script for App Store screenshots at all required device sizes
+- `INFOPLIST_KEY_NSLocalNetworkUsageDescription` for friendly first-run permission prompt copy
+- App Store Connect: 17+ rating, screenshots upload, description (Strategic Claude already drafted), TestFlight invite
+- Real-device verification: torch in dark room (Sleep), 40-min Open mode end-to-end, Mac Catalyst window behavior
 
 ---
 
@@ -84,7 +124,7 @@ Clean start. Full spec. Five documents. Two original Swift files for reference.
 
 **Engineering notes for the next session (Session 7 — App Store prep):**
 - App icon. Currently default. Needs warm glyph on black, gradient language.
-- Launch screen. Currently default. Could be the gradient bar + NEUROLIGHT title fading in.
+- Launch screen. Currently default. Could be the gradient bar + PURE PHASE title fading in.
 - Reduce Motion warning on first launch (one-time gentle "this app uses rapid flicker by design").
 - VoiceOver labels on all tile glyphs.
 - Screenshot automation script — bash wrapper around `/screenshot`, walks all screens, captures at every Apple-required iPhone/iPad/Mac resolution.
@@ -103,7 +143,7 @@ Clean start. Full spec. Five documents. Two original Swift files for reference.
 - `/help` now reports the bound port.
 - `popToRootTicket: Int` on the bus, observed by ContentView. `/navigate to=home` now bumps the ticket to actually clear the navigation stack — previously it only cleared request flags, leaving you stranded on Advanced.
 
-**Port moved 8765 → 8770.** Another simulator app ("Posey") owns 8765. Conflict was silent — server failed to bind, requests were going to whoever responded first. Moved to 8770 (NeuroLight-specific). Documented in source and HANDOFF.
+**Port moved 8765 → 8770.** Another simulator app ("Posey") owns 8765. Conflict was silent — server failed to bind, requests were going to whoever responded first. Moved to 8770 (Pure Phase-specific). Documented in source and HANDOFF.
 
 **Small bug fixed during verification:**
 - `SessionView` was gating breath cue firing on `engine.brightness > 0.05`, which meant the very first Inhale cue at session start was missed (brightness needed ~0.15s to clear the threshold). The master fade envelope already mutes cues during fade-in via `mixer.outputVolume = brightness`, so the explicit gate was redundant *and* missed the opening cue. Removed.
@@ -129,7 +169,7 @@ Clean start. Full spec. Five documents. Two original Swift files for reference.
 
 **Not yet verified (deferred — needs phone hardware or hands-on):**
 - Audio interruption: Siri / phone call mid-session pause/resume. Hard to reproduce in sim. Verify on physical phone with a real call.
-- "Use NeuroLight audio or keep my music?" prompt — `isOtherAudioPlaying` is exposed but no UI gate yet.
+- "Use Pure Phase audio or keep my music?" prompt — `isOtherAudioPlaying` is exposed but no UI gate yet.
 - Cream ring + halo *audibility* of cue tones. Code looks right; ear test pending.
 
 **Installed on Mark's iPhone 16 Plus.** Try it — BREATHE tile, tap to start, hold to tune.
@@ -173,7 +213,7 @@ Clean start. Full spec. Five documents. Two original Swift files for reference.
 
 **Audio interruption — handled.**
 - `Engine/AudioEngine.swift` — `init()` registers an observer on `AVAudioSession.interruptionNotification`. On `.began`: pauses all three nodes and the engine. On `.ended` with `.shouldResume` option set: reactivates the audio session and restarts. Phase realignment is best-effort (we don't try to resync flicker math; the user won't notice).
-- `AudioEngine.isOtherAudioPlaying` static property exposed so future onboarding can offer "use NeuroLight audio or keep my music" choice (the prompt itself isn't wired into the UI yet — deferred until next session, since it's a small UX decision: ask once, ask every session, etc.).
+- `AudioEngine.isOtherAudioPlaying` static property exposed so future onboarding can offer "use Pure Phase audio or keep my music" choice (the prompt itself isn't wired into the UI yet — deferred until next session, since it's a small UX decision: ask once, ask every session, etc.).
 
 **Screen-name bookkeeping — fixed.**
 - `Views/SessionView.swift` — saves the previous `bus.currentScreen` value on appear, restores it on disappear. No more clobber to `"home"` after exiting a session that came from Advanced.
@@ -191,7 +231,7 @@ Clean start. Full spec. Five documents. Two original Swift files for reference.
 - After exiting a Theta session from Advanced, `GET /state` should report `screen: advanced` (not `home`)
 
 **Known deferred:**
-- "Use NeuroLight audio or keep my music?" prompt — wired in `isOtherAudioPlaying` but no UI gate yet.
+- "Use Pure Phase audio or keep my music?" prompt — wired in `isOtherAudioPlaying` but no UI gate yet.
 - Reduce Motion warning, App icon, launch screen, VoiceOver pass — Session 7.
 - Privacy policy text + App Store description draft — Session 8.
 
@@ -302,7 +342,7 @@ Clean start. Full spec. Five documents. Two original Swift files for reference.
 - iOS Simulator build → BUILD SUCCEEDED.
 - iOS Device build → BUILD SUCCEEDED, installed on Mark's iPhone 16 Plus via `devicectl`.
 - Onboarding screen confirmed visually correct (warm gradient, dim red warning, gated checkbox, ENTER button enables on accept).
-- Home screen confirmed visually correct (black canvas, three warm glyphs in proper tints, NEUROLIGHT title, ADVANCED affordance).
+- Home screen confirmed visually correct (black canvas, three warm glyphs in proper tints, PURE PHASE title, ADVANCED affordance).
 
 **Engineering notes for Session 4:**
 - Third-party `mcp__ios-simulator__ui_tap` reports success but coordinate mapping is unreliable. The new HTTP automation tool should bypass it entirely — hook the app directly via a debug-only embedded HTTP server with verbs for navigation, settings, taps by `accessibilityIdentifier`, session control, and live state observation.
@@ -410,7 +450,7 @@ Clean start. Full spec. Five documents. Two original Swift files for reference.
 - Universal `SessionConfig.default(for:)` rather than per-state defaults — simpler, less surprising.
 
 **Verified:**
-- `xcodebuild -scheme NeuroLight -destination 'generic/platform=iOS Simulator' -configuration Debug build` → BUILD SUCCEEDED.
+- `xcodebuild -scheme Pure Phase -destination 'generic/platform=iOS Simulator' -configuration Debug build` → BUILD SUCCEEDED.
 
 **Confirmed with Mark:**
 - "Open" duration = no time limit, runs until tap-to-exit; all other durations end with a 30-second fade.

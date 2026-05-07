@@ -1,4 +1,4 @@
-# HANDOFF_BRIEF.md — NeuroLight Session Bridge
+# HANDOFF_BRIEF.md — Pure Phase Session Bridge
 *Update this at the end of every meaningful work session. It is the first document a new instance reads.*
 
 ---
@@ -63,7 +63,7 @@ Screenshots in `Docs/Screenshots/` show the warm Calm and ember Sleep aesthetic 
 - `Views/Components/IntentTileView.swift` — sparse home tile, ultra-light SF Symbol painted in the gradient with a soft outer glow. Press feedback is a quiet brightness lift.
 - `Views/Components/GradientProgressRing.swift` — 1-pt rounded-rectangle stroke traced from top-center, peripheral by design.
 - `Views/OnboardingView.swift` — first-launch warning gated by an actual checkbox (not tap-through), persisted via `@AppStorage`, no medical claims (verified against the approved-language list).
-- `Views/HomeView.swift` — three glyphs on black: `viewfinder` for FOCUS, `water.waves` for CALM, `moon.fill` for SLEEP. Industrial NEUROLIGHT title, ADVANCED affordance at the bottom (Session 4). NavigationStack with hidden toolbar and explicit Color.black background.
+- `Views/HomeView.swift` — three glyphs on black: `viewfinder` for FOCUS, `water.waves` for CALM, `moon.fill` for SLEEP. Industrial PURE PHASE title, ADVANCED affordance at the bottom (Session 4). NavigationStack with hidden toolbar and explicit Color.black background.
 - `Views/SessionConfigView.swift` — pre-session controls: duration row (5/10/20/40/Open), audio block (sound toggle, tone slider, ambient type segmented, texture slider), breath block (toggle + preset list), visual block (color flash, torch — torch row hidden when `TorchController.isAvailable == false`, i.e. always under Catalyst). All settings persist via `@AppStorage`. Begin button uses the state's gradient.
 - `Views/BreathGuideView.swift` — single ring, ease-in-out scale 0.4↔1.0 mapped from `engine.breathPhase`, soft inner glow gradient, 0.5 Hz shimmer during hold stages, opacity rides on `engine.brightness`.
 - `Views/SessionView.swift` — full-screen flicker layer (color or gradient depending on Color Flash toggle), opacity multiplied by `engine.brightness` so 3 s fade-in and 30 s fade-out are automatic; breath guide overlay; edge progress ring; tap-reveal exit + remaining timer with 3 s auto-hide; idle timer disabled during session; psychedelic warm hue drift via `.hueRotation` clamped to ±22°.
@@ -177,9 +177,22 @@ These don't block Engine work — flagging only so they're remembered when Views
 ---
 
 ## Last Updated
-May 2026 — Session 6 fully landed. iOS 17 deployment target, Layout.contentMaxWidth = 560 cap applied across Home/Advanced/Config/Onboarding, Restore Defaults button, audio interruption now suspends flicker + torch + audio together via SessionEngine. Both iOS sim and Mac Catalyst build green. Audio output verified emitting at `maxPeak ≈ 0.42` via the in-app debug tap on `/state.audio`. Installed on Mark's iPhone 16 Plus. Server on **port 8770**.
+May 2026 — **Session 7: Renamed to Pure Phase. GitHub repo and Pages live.**
 
-Three issues explicitly deferred to 1.1 — see MEMORY.md "Known Polish Issues":
+The product is now **Pure Phase**. Bundle ID `com.MarkFriedlander.PurePhase`. Display name "Pure Phase". Public repo at `https://github.com/markfriedlander/pure-phase`. Privacy + support pages at `https://markfriedlander.github.io/pure-phase/{privacy,support}.html` (HTTP 200, verified). App icon is the warm radial pulse — no letterform.
+
+Source tree, Xcode project file, and legacy `NeuroLightApp` struct keep their original names on disk. The product is Pure Phase; the codename internally is unchanged.
+
+Installed on Mark's iPhone 16 Plus.
+
+**Carried forward from Session 6** (still true):
+- iOS 17 deployment target, Mac Catalyst, max-width 560 pt cap on Home/Advanced/Config/Onboarding
+- Restore Defaults button in SessionConfigView
+- Audio interruption suspends flicker + torch + audio together via SessionEngine
+- Audio output verified at `maxPeak ≈ 0.42` via debug-only tap on `/state.audio`
+- Automation server on **port 8770** (DEBUG only)
+
+**Three issues deferred to 1.1** (see MEMORY.md "Known Polish Issues"):
 - Halo stutter at breath cycle peaks (blur+scaleEffect interaction)
 - 40 Hz Focus pattern change on 60 Hz (non-ProMotion) displays
 - Grey noise ambient option (ISO 226 filtered)
