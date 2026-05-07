@@ -288,5 +288,21 @@ A future Pure Phase mode in the same family as BREATHE — purely auditory, no f
 
 Out of scope for v1. Worth designing carefully — wrong execution is just unpleasant noise; right execution is genuinely transporting. Lineage is well-documented in drone music; we'd want to study Radigue's three-oscillator approach, Niblock's overtone-cluster technique, and the Tartini tone literature before implementing. Defer to 1.x discussion with Mark.
 
+### Apple TV (tvOS) support
+Mark surfaced this during App Store Connect submission for 1.0. The big-screen-in-a-dark-room version of Pure Phase is arguably the *intended* eyes-closed experience scaled up — far more immersive than a phone, especially for SLEEP. Audio is also significantly better through TV speakers / home theater than through a phone speaker.
+
+**Engineering scope (roughly 2–3 sessions):**
+- Add tvOS to `TARGETED_DEVICE_FAMILY` (currently "1,2"), add tvOS scheme/target
+- Redesign home for landscape — four glyphs laid out horizontally rather than vertically; the 560 pt content cap is wrong for this surface
+- Replace tap/long-press with focus-engine + Siri Remote button mapping. Click on the focus = start session; Play/Pause or long-hold = config; Menu = back
+- Scale the breath ring up significantly on TV's larger canvas (320 pt is intimate on iPhone but lost in a 1080p / 4K rectangle)
+- Strengthen the onboarding photosensitivity warning further — a 65" OLED at 40 Hz Gamma hits harder than an iPhone screen
+- Skip torch entirely (no hardware on TV — same gating pattern as Catalyst)
+- HTTP automation server: needs to be tested on tvOS, may need adjustments. Bonjour discovery might be useful since Apple TV doesn't have a friendly localhost story
+- Separate tvOS listing on App Store (parallel to Mark's existing Reflect TV pattern)
+- Separate tvOS screenshots — landscape, larger device sizes
+
+**Out of scope for 1.0.** Defer to 1.1 or 1.2 depending on what other polish accumulates after launch.
+
 ### Closed-loop biofeedback entrainment (Apple Watch)
 Apple exposes real-time heart rate streaming to third-party apps via HealthKit during active workout sessions, typically at 1-second resolution. A future version of Pure Phase could use incoming HR and HRV data to modulate flicker frequency and audio in real time — nudging toward Alpha if HR is elevated, holding at target state as HRV improves. The breath guide could adjust its pacing dynamically to meet the user rather than imposing a fixed rhythm. This is closed-loop neurofeedback. It is the right direction for a 2.0 but explicitly out of scope for v1.

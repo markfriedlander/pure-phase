@@ -176,6 +176,21 @@ These don't block Engine work — flagging only so they're remembered when Views
 
 ---
 
+## In-progress: App Store submission (May 2026, mid-session)
+
+CC and Mark are mid-way through the App Store Connect submission flow for Pure Phase 1.0. **Authoritative state, drafted copy, and the full pending checklist are in `Docs/AppStoreSubmission.md`.** Read that first if continuing the submission work; do NOT re-derive from scratch.
+
+Quick summary of where we are:
+- App Store Connect listing created (Apple ID 6767311034)
+- Bundle ID `com.MarkFriedlander.PurePhase` registered with Apple Developer
+- App Information page: Primary category = Health & Fitness, Secondary = Lifestyle, **saved**
+- Subtitle, Content Rights, App Privacy questionnaire, Pricing & Availability, version 1.0 metadata, age rating, build upload — all still pending
+- Strategic Claude's drafted description / keywords / promotional text / What's New copy lives in the AppStoreSubmission doc
+
+If a context compaction happened mid-flow, the recovery doc has everything needed to resume.
+
+---
+
 ## Pick up tomorrow morning here
 
 **Mark stopped at end of evening on May 6, 2026 — got tired suddenly. Resuming in the AM.**
