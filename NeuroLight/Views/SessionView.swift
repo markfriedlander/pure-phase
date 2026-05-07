@@ -25,10 +25,13 @@ struct SessionView: View {
 
     @State private var engine = SessionEngine()
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @AppStorage(StorageKey.ackReduceMotion) private var ackReduceMotion: Bool = false
     @State private var overlayVisible: Bool = false
     @State private var overlayHideTask: Task<Void, Never>?
     @State private var lastBreathStage: String = ""
     @State private var savedScreen: String = "home"
+    @State private var showingReduceMotionGate: Bool = false
     @Bindable private var bus = AutomationBus.shared
 
     var body: some View {
@@ -110,6 +113,7 @@ struct SessionView: View {
                         .buttonStyle(.plain)
                         .padding(.trailing, 8)
                         .padding(.top, 8)
+                        .accessibilityLabel("Exit session")
                         .accessibilityIdentifier("session.exit")
                     }
                     Spacer()
@@ -133,12 +137,25 @@ struct SessionView: View {
             #if !targetEnvironment(macCatalyst)
             UIApplication.shared.isIdleTimerDisabled = true
             #endif
-            engine.start(config: config) {
-                Task {
-                    try? await Task.sleep(nanoseconds: 1_500_000_000)
-                    dismiss()
-                }
+            // Reduce Motion gate: only for entrainment modes (flicker).
+            // Breathwork is exempt — it has no rapid motion. Once
+            // acknowledged, it never asks again on this device.
+            if !state.isBreathwork && reduceMotion && !ackReduceMotion {
+                showingReduceMotionGate = true
+            } else {
+                startEngine()
             }
+        }
+        .alert("Reduce Motion is enabled", isPresented: $showingReduceMotionGate) {
+            Button("Cancel", role: .cancel) {
+                dismiss()
+            }
+            Button("Continue") {
+                ackReduceMotion = true
+                startEngine()
+            }
+        } message: {
+            Text("Pure Phase uses rapid rhythmic flicker — that's the entrainment mechanism. You have Reduce Motion enabled. Continue this session?")
         }
         .onDisappear {
             engine.stop()
@@ -170,6 +187,15 @@ struct SessionView: View {
         }
         .animation(.easeInOut(duration: 0.6), value: overlayVisible)
         .preferredColorScheme(.dark)
+    }
+
+    private func startEngine() {
+        engine.start(config: config) {
+            Task {
+                try? await Task.sleep(nanoseconds: 1_500_000_000)
+                dismiss()
+            }
+        }
     }
 
     private func revealOverlay() {

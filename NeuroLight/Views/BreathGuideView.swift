@@ -58,6 +58,9 @@ struct BreathGuideView: View {
         .frame(width: size, height: size)
         .scaleEffect(scale)
         .opacity(shimmer)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Breath guide")
+        .accessibilityValue(stageName.isEmpty ? "Starting" : stageName)
         // No implicit .animation here — the engine produces a fresh
         // scale every CADisplayLink tick (60–120 Hz). An ease-in-out
         // animation per frame causes the SwiftUI animation system to

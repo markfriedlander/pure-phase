@@ -58,7 +58,7 @@ struct OnboardingView: View {
                             .foregroundColor(Color(hex: 0x888480))
                             .padding(.top, 10)
 
-                        Text("This app uses rhythmic flickering light. Do not use if you are photosensitive, prone to seizures, currently driving, or operating machinery. Always use in a safe, still environment. This is not a medical device.")
+                        Text("Pure Phase intentionally uses rapid rhythmic flicker — that's how visual entrainment works. The Focus, Calm, Sleep, and Advanced modes are not designed for users with photosensitivity, seizure history, vestibular disorders, motion sensitivity, or significant vision impairment. The Breathe mode has no flicker and is usable by anyone.\n\nDo not use the entrainment modes while driving or operating machinery. Always use in a safe, seated environment. This is not a medical device and makes no medical claims.")
                             .font(.system(size: 17, weight: .regular))
                             .foregroundColor(Color(hex: 0xC0392B))
                             .lineSpacing(4)

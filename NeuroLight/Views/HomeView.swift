@@ -27,6 +27,7 @@ struct HomeView: View {
                         ))
                         .frame(width: 180, height: 1.5)
                         .padding(.top, 24)
+                        .accessibilityHidden(true)
 
                     Text("PURE PHASE")
                         .font(.system(size: 20, weight: .bold))

@@ -67,6 +67,25 @@ TorchController
 **Decision:** Breath pacing and light flicker run at their own rates; they do not need to align.
 **Rationale:** They are entraining different systems — respiratory/vagal tone (breath) vs. cortical oscillation (flicker). A 6 BPM breath cycle and 10Hz Alpha flicker have no natural common frequency. Forcing alignment would require compromising one or both. They share a start time and clock source but run at their own periods.
 
+### Decision: Accessibility scope — selective compliance, honest framing
+**Date:** May 2026
+**Decision:** Pure Phase implements accessibility selectively, not exhaustively, and is explicit about its limits in the onboarding warning.
+
+**Implemented:**
+- **VoiceOver on the breath path.** All home and advanced tiles have descriptive `accessibilityLabel` (e.g. "Focus — 40 hertz visual flicker, gamma frequency"), `accessibilityHint` ("Double tap to begin a session"), and a custom `Configure` action via `accessibilityAction(named:)` so VO users can reach the config screen without long-pressing. SF Symbol glyphs are marked `accessibilityHidden(true)` (decorative; the label below carries meaning). Decorative gradient bars are hidden from VO. Sliders and pickers throughout SessionConfigView have meaningful labels and value descriptions ("Tone volume, 60 percent"). The breath ring during a session announces its current stage as `accessibilityValue` so VO users hear "Inhale" → "Hold" → "Exhale". The exit button has an explicit "Exit session" label.
+- **Reduce Motion gate.** When iOS Reduce Motion is enabled and the user starts an entrainment session for the first time, an alert appears: "Pure Phase uses rapid rhythmic flicker — that's the entrainment mechanism. You have Reduce Motion enabled. Continue this session?" Cancel dismisses; Continue persists acknowledgment via `@AppStorage("ackReduceMotion")` so subsequent sessions don't re-prompt. **Breathwork mode is exempt** — it has no rapid motion. The acknowledgment key is intentionally NOT reset by Restore Defaults (it's a safety acknowledgment, not a setting).
+- **Strengthened onboarding warning.** Now explicit about who the entrainment modes are not for (photosensitivity, seizure history, vestibular disorders, motion sensitivity, significant vision impairment) and explicit that BREATHE has no flicker.
+- **Color blindness already handled** by the warm-only palette (no red/green or red/blue ambiguity).
+
+**Intentionally NOT implemented:**
+- **Dynamic Type** — every text element uses fixed font sizes via `.font(.system(size: X))`. Scaling them would break the typographic identity (tight letter-spacing on bold compressed wordmarks, sparse layouts). Additionally, the user population that needs Dynamic Type heavily overlaps with the population that should not be using flicker entrainment in the first place — optimizing for them in a flicker-based app is solving the wrong problem. Documented in the warning instead.
+- **VoiceOver optimization on entrainment session screens** — a blind user cannot perceive the visual flicker; VO labels there would be performative. The default labels suffice. The breathwork session is the genuinely accessible alternative.
+- **Full WCAG audit.** Pure Phase is a free indie app with explicit warnings, not a public service.
+
+**Rationale:** The app's central feature is rapid visual flicker. That feature is fundamentally inaccessible to several user populations, by design. Token Dynamic Type support that doesn't actually help those users is dishonest. Selective compliance plus explicit framing in the warning ("we've designed it for a specific kind of experience; if that's not for you, that's the right call") is more respectful and accurate.
+
+**Apple App Store compliance:** Apple requires apps to not misrepresent accessibility, not to be universally accessible. A free indie app with an accurate prominent warning, a genuinely accessible alternate mode (BREATHE), respect for explicit user signals (Reduce Motion), and a 17+ rating is acceptable.
+
 ### Decision: Project renamed NeuroLight → Pure Phase
 **Date:** May 2026
 **Decision:** Public name of the app is **Pure Phase**. Bundle identifier `com.MarkFriedlander.PurePhase`. Display name (CFBundleDisplayName) "Pure Phase". Wordmark text in Onboarding/Home/Advanced reads "PURE PHASE". GitHub repo at `markfriedlander/pure-phase`. Pages live at `https://markfriedlander.github.io/pure-phase/{privacy,support}.html`.

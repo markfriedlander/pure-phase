@@ -60,6 +60,13 @@ private struct TileGestureModifier: ViewModifier {
                     onLongPress()
                 }
         )
+        // VoiceOver users can't easily hold to long-press, so we expose
+        // "Configure" as a custom action. The default tap action runs
+        // onTap (start session); the rotor-selectable Configure runs
+        // onLongPress (open the config screen for this state).
+        .accessibilityAction(named: Text("Configure")) {
+            onLongPress()
+        }
     }
 }
 

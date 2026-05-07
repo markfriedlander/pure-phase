@@ -27,6 +27,7 @@ struct AdvancedView: View {
                         ))
                         .frame(width: 140, height: 1.5)
                         .padding(.top, 18)
+                        .accessibilityHidden(true)
 
                     Text("ADVANCED")
                         .font(.system(size: 16, weight: .bold))
@@ -98,6 +99,7 @@ struct AdvancedView: View {
                 .foregroundStyle(state.sessionTint.gradient)
                 .shadow(color: state.sessionTint.startColor.opacity(0.32), radius: 12)
                 .frame(height: 60)
+                .accessibilityHidden(true)  // decorative
 
             Text(state.displayName)
                 .font(.system(size: 12, weight: .semibold))
@@ -111,6 +113,9 @@ struct AdvancedView: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 22)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(state.displayName), \(state.hz, specifier: "%.1f") hertz")
+        .accessibilityHint("Double tap to begin a session.")
         .tileGesture(
             onTap: { bus.requestedSession = SessionConfig.fromAppStorage(state: state) },
             onLongPress: { bus.requestedConfigState = state.id }

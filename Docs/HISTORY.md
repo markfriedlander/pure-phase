@@ -45,6 +45,44 @@ Clean start. Full spec. Five documents. Two original Swift files for reference.
 
 ---
 
+## May 2026 — Session 7 (continued): Accessibility pass + Reduce Motion gate
+
+**Selective accessibility compliance** with honest framing in the onboarding warning. See MEMORY.md "Accessibility scope" decision for the full rationale and what was intentionally skipped.
+
+**Implemented:**
+
+**1. Strengthened onboarding warning** — was generic ("Do not use if photosensitive..."); now explicitly enumerates who the entrainment modes are not designed for (photosensitivity, seizure history, vestibular disorders, motion sensitivity, significant vision impairment) and explicitly notes that BREATHE has no flicker and is usable by anyone. Frames the limits as intentional design, not deficiency.
+
+**2. Reduce Motion gate** in `SessionView`:
+- New `@Environment(\.accessibilityReduceMotion)` check
+- New `@AppStorage(StorageKey.ackReduceMotion)` flag, default false
+- On first entrainment session with Reduce Motion enabled, an alert blocks engine start until user explicitly acknowledges. Cancel dismisses; Continue persists ack so subsequent sessions don't re-prompt
+- Breathwork mode bypasses the gate (no rapid motion)
+- `ackReduceMotion` is NOT included in `StorageDefault.restoreAll()` — it's a safety acknowledgment, not a config setting
+- New `startEngine()` private method on SessionView so onAppear can defer engine.start() until after the gate decision
+
+**3. VoiceOver — breathwork-prioritized:**
+- `IntentTileView` exposes per-state spoken labels via `accessibilityLabel` (e.g. "Breathe — guided breathwork, no flicker", "Focus — 40 hertz visual flicker, gamma frequency"). `accessibilityElement(children: .combine)` so VO reads the tile as one unit. `accessibilityHint("Double tap to begin a session")`. SF Symbol glyph marked `accessibilityHidden(true)` (decorative).
+- `TileGesture` adds `accessibilityAction(named: Text("Configure"))` so VO users can reach the config screen via the rotor without needing to long-press.
+- `AdvancedView` tile gets `accessibilityLabel("\(state.displayName), \(hz) hertz")` plus the same hint.
+- `BreathGuideView` exposes the current breath stage via `accessibilityValue` — VO users hear "Breath guide, Inhale" → "Breath guide, Hold" → "Breath guide, Exhale" as the breath cycles. `accessibilityElement(children: .ignore)` on the ZStack so VO doesn't read individual circles.
+- `SessionConfigView` sliders all have `accessibilityLabel` + `accessibilityValue`. Tone/Texture/Cues volume sliders read as "60 percent". Custom Hz reads as "10.0 hertz". Carrier reads as "174 hertz". Custom breath sliders read as "Inhale, 5.0 seconds" etc. Their visible labels are `accessibilityHidden(true)` so VO doesn't read them twice.
+- Decorative gradient bars (top of HomeView, AdvancedView) marked `accessibilityHidden(true)`.
+- Exit button in `SessionView` overlay gets explicit `accessibilityLabel("Exit session")` — was reading as "X mark, button".
+
+**Intentionally skipped:**
+- Dynamic Type retrofit (43 fixed-size font calls would all need conversion; conflicts with the typographic identity; population overlap with photosensitivity makes it the wrong target)
+- VoiceOver optimization on entrainment session screens (a blind user cannot perceive the flicker; VO labels there are performative)
+- `NSLocalNetworkUsageDescription` Info.plist key — turns out we don't need it. AutomationServer is `#if DEBUG`-only and stripped from Release builds. The Release binary has zero network code, so iOS won't ask for Local Network permission at all. Removed from Session 7 list.
+
+**Verified:**
+- iOS Simulator build: SUCCEEDED.
+- Spot check via VoiceOver on simulator (rotor → custom actions → "Configure" available on every tile).
+
+**Installed on Mark's iPhone 16 Plus.**
+
+---
+
 ## May 2026 — Session 7: Rename to Pure Phase + GitHub repo + Pages live
 
 **The product is now Pure Phase.** A different company is using "NeuroLight" for entrainment hardware. Switched names cleanly.

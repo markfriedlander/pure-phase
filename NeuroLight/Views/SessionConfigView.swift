@@ -186,6 +186,8 @@ struct SessionConfigView: View {
             }
             Slider(value: $customHz, in: 0.5...40, step: 0.5)
                 .tint(Color(hex: 0xE8593C))
+                .accessibilityLabel("Brainwave frequency")
+                .accessibilityValue(String(format: "%.1f hertz", customHz))
 
             HStack {
                 Text("CARRIER")
@@ -200,6 +202,8 @@ struct SessionConfigView: View {
             }
             Slider(value: $customCarrierHz, in: 80...440, step: 2)
                 .tint(Color(hex: 0xE8593C))
+                .accessibilityLabel("Carrier frequency")
+                .accessibilityValue("\(Int(customCarrierHz)) hertz")
         }
         .padding(.horizontal, 36)
     }
@@ -360,12 +364,16 @@ struct SessionConfigView: View {
                 .tracking(2)
                 .foregroundColor(Color(hex: 0x888480))
                 .frame(width: 70, alignment: .leading)
+                .accessibilityHidden(true)
             Slider(value: value, in: range, step: 0.5)
                 .tint(Color(hex: 0xE8593C))
+                .accessibilityLabel(label.lowercased())
+                .accessibilityValue(String(format: "%.1f seconds", value.wrappedValue))
             Text(String(format: "%.1fs", value.wrappedValue))
                 .font(.system(size: 10, weight: .regular, design: .monospaced))
                 .foregroundColor(.white.opacity(0.7))
                 .frame(width: 38, alignment: .trailing)
+                .accessibilityHidden(true)
         }
     }
 
@@ -399,8 +407,11 @@ struct SessionConfigView: View {
                 .tracking(2)
                 .foregroundColor(Color(hex: 0x888480))
                 .frame(width: 60, alignment: .leading)
+                .accessibilityHidden(true)
             Slider(value: value, in: 0...1)
                 .tint(Color(hex: 0xE8593C))
+                .accessibilityLabel(label)
+                .accessibilityValue("\(Int(value.wrappedValue * 100)) percent")
         }
     }
 

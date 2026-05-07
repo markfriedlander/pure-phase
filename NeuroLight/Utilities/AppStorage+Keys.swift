@@ -40,6 +40,10 @@ enum StorageKey {
     // Breathwork-mode toggles.
     static let breathAudioCues     = "breathAudioCues"
     static let breathCueVolume     = "breathCueVolume"
+
+    // One-time acknowledgment that user knows about rapid flicker
+    // despite having Reduce Motion enabled. Persists once granted.
+    static let ackReduceMotion     = "ackReduceMotion"
 }
 
 enum StorageDefault {
