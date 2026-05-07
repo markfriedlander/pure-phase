@@ -111,6 +111,32 @@ To install on a physical device, you'll need to set your own development team in
 
 The Xcode project folder is named `NeuroLight/` and contains a `NeuroLightApp` struct. These predate the rename and are kept under their original names because changing them would create churn for no user-visible benefit. The product, the bundle identifier, and the display name are all "Pure Phase".
 
+## Releasing — App Store screenshots
+
+Whenever a release needs fresh App Store screenshots (UI changed, new mode added, etc.), run:
+
+```bash
+xcodebuild -project NeuroLight.xcodeproj -scheme NeuroLight \
+  -destination 'generic/platform=iOS Simulator' -configuration Debug build
+scripts/capture_screenshots.sh
+```
+
+The script drives the simulator via the debug HTTP automation server and captures five screens at Apple's required device resolutions (iPhone 6.9", iPad 13"):
+
+| # | Screen | Why |
+|---|---|---|
+| 1 | Home | The four-tile entry point |
+| 2 | Advanced | The five-tile science menu |
+| 3 | BREATHE config | Most variety-rich settings screen (cues toggle, ambient picker, breath patterns) |
+| 4 | BREATHE session in progress | Cream ring + warm halo on black; no flicker, easy timing |
+| 5 | FOCUS at full flash | Demonstrates entrainment visually; FOCUS's bright amber on-frame is the most striking color in the app. Caught via 8-shot burst capture + a Swift helper that picks by average pixel luminance (`scripts/pick_brightest.swift`) — file size alone isn't a reliable on-frame signal for low-saturation colors. |
+
+For each PNG, a companion `*-thumb.png` is produced via `sips -Z 400` for safe inspection without bloating context. The full-size files are what get uploaded to App Store Connect; thumbnails are for quick previewing or for any agent that needs to verify content programmatically.
+
+Output goes to `Docs/AppStoreScreenshots/` (gitignored).
+
+If you ever extend the script to add a 6th shot or change the lineup, keep the output count low — App Store reviewers prefer 3–5 distinctive shots over 10 redundant ones.
+
 ## Privacy
 
 Pure Phase collects nothing, transmits nothing, stores nothing on a server. All settings are local. The full privacy policy is at https://markfriedlander.github.io/pure-phase/privacy.html.

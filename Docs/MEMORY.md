@@ -86,6 +86,29 @@ TorchController
 
 **Apple App Store compliance:** Apple requires apps to not misrepresent accessibility, not to be universally accessible. A free indie app with an accurate prominent warning, a genuinely accessible alternate mode (BREATHE), respect for explicit user signals (Reduce Motion), and a 17+ rating is acceptable.
 
+### Decision: App Store screenshot capture is a tracked tool, not a one-off
+**Date:** May 2026
+**Decision:** `scripts/capture_screenshots.sh` is committed to the repo and is the canonical way to produce App Store screenshots for any Pure Phase release. Future versions (1.1, 1.2, etc.) re-run the same script when UI changes warrant new screenshots.
+
+**The 5-shot lineup is deliberate:**
+1. Home — the four-tile entry point
+2. Advanced — the five-tile science menu
+3. BREATHE config — most variety-rich settings screen (cues + ambient picker + breath patterns including Custom)
+4. BREATHE session in progress — cream ring + halo, no flicker (easy timing)
+5. FOCUS at full flash — demonstrates entrainment visually; bright amber on-frame is the most striking color in the app and the highest-contrast vs the black off-frame
+
+**Why these specifically, why nothing else:** entrainment session screens (FOCUS, CALM, SLEEP) differ only in tint — adding multiple is duplicative. App Store reviewers prefer 3–5 distinctive shots over 10 redundant ones. BREATHE config is chosen because it has unique controls (cues toggle, cue volume slider, ambient picker) that the entrainment configs don't. **FOCUS for the on-frame shot** rather than SLEEP because FOCUS's bright amber (#F5A623, luminance ~167) is dramatically more visible than SLEEP's deep ember red (#8B2E1F, luminance ~64) — the SLEEP on-frame is correct but reads as "atmospheric and quiet" rather than "this app does visual entrainment." Initially considered SLEEP because of easier on-frame timing (2 Hz vs 40 Hz), but solved that with the burst-capture approach below.
+
+**Engineering hard-won lessons baked into the script:**
+- **Port collision between sims.** Both iPhone and iPad sims share the Mac's localhost. If the iPhone app binds port 8770 and we then try to capture the iPad without terminating the iPhone app first, the iPad's automation server fails to bind silently. Every API call goes to the iPhone (which is the wrong device); every iPad screenshot captures the same pre-action state. Fixed via `release_port_from_other_sims` which terminates Pure Phase on all other booted sims before launching the target.
+- **Curl timeouts.** Default curl behavior on a non-responsive server is ~75 seconds of TCP timeout. With the polling loop in `capture_at_on_phase` running 30 attempts, that's a 37-minute hang on a dead server. Fixed via `--max-time 2`.
+- **`wait_for_server` must be honored.** Original version logged a warning and continued; now it returns 1 and the capture function bails with a loud error.
+- **Status bar override** so screenshots show 9:41 / full battery / full Wi-Fi instead of whatever the sim happens to be in. Apple's convention.
+- **Each PNG gets a `-thumb.png` companion** via `sips -Z 400`, in line with the image-handling rule.
+- **Burst capture for the on-frame shot.** Polling `/state` for `flickerPhase=true` and capturing afterwards has 200–400 ms of overhead between the "on" report and the actual screenshot — at 40 Hz the on-phase is 12.5 ms, polling consistently misses. Solution: take 8 screenshots back-to-back (each ~150 ms, total ~1.2 s ≈ 48 cycles), then pick the brightest. File size alone is unreliable for low-saturation colors (PNG compresses uniform deep red almost identically to uniform black) — `scripts/pick_brightest.swift` computes actual average pixel luminance via Core Graphics and prints the brightest path. The `.burst/` folder is kept on disk so the auto-pick can be manually overridden if needed.
+
+**For the next release** (1.1+): re-run the script after building, eyeball the output in Finder, upload to App Store Connect. If the home screen or session UI changes substantively, the output of the script will reflect that automatically — no script changes needed. If a new mode is added (e.g., Resonance / Drone — see Phase 4 Concepts), add a 6th step to the script's per-device flow. Keep the total count under 7.
+
 ### Decision: CC must never read full-size image files
 **Date:** May 2026
 **Decision:** A hard rule, documented in `CLAUDE.md` under "Image Handling Rule": Claude Code must never use the `Read` tool on files ending `.png`, `.jpg`, `.jpeg`, `.gif`, `.heic`, `.heif`, `.bmp`, or `.webp`, with one exception — files whose name ends `-thumb.png`.

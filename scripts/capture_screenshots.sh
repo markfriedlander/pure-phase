@@ -17,6 +17,10 @@
 #   2. advanced      — the five-tile science menu
 #   3. config        — BREATHE config (unique cues toggle + ambient picker)
 #   4. breathe       — BREATHE session in progress (cream ring + halo)
+#   5. focus_flash   — FOCUS session caught at the flicker on-frame
+#                      (40 Hz; bright amber #F5A623 is the most striking
+#                      on-frame in the app, caught via 8-shot burst +
+#                      brightness-based picker — see scripts/pick_brightest.swift)
 #
 # For each PNG, we also produce a `-thumb.png` at max dimension 400px
 # via the built-in `sips` tool. The thumbnails are small enough (~150 KB)
@@ -87,15 +91,33 @@ shot() {
     "$(du -h "$thumb" | cut -f1)"
 }
 
-# POST to the automation server.
+# POST to the automation server. Short timeout so a missing server
+# doesn't hang the script — failed bind on a busy port is silent and
+# we'd rather fail loud and fast than wait 75 s of TCP timeout.
 api_post() {
   local path="$1"
   local body="${2:-}"
   if [ -n "$body" ]; then
-    curl -s -X POST "${HOST}${path}" -H "Content-Type: application/json" -d "$body" > /dev/null
+    curl -s --max-time 2 -X POST "${HOST}${path}" -H "Content-Type: application/json" -d "$body" > /dev/null || true
   else
-    curl -s -X POST "${HOST}${path}" > /dev/null
+    curl -s --max-time 2 -X POST "${HOST}${path}" > /dev/null || true
   fi
+}
+
+# Kill Pure Phase on every other booted sim BEFORE starting a new capture,
+# so we never have two sims fighting for port 8770 on the Mac's localhost.
+# (Discovered the hard way: identical screenshots from a sim where the
+# server failed to bind because a previous sim's app was still running.)
+release_port_from_other_sims() {
+  local me="$1"
+  local booted
+  booted=$(xcrun simctl list devices booted 2>/dev/null \
+    | grep -oE '\([0-9A-F-]{36}\)' | tr -d '()')
+  for other in $booted; do
+    if [ "$other" != "$me" ]; then
+      xcrun simctl terminate "$other" "$BUNDLE_ID" 2>/dev/null || true
+    fi
+  done
 }
 
 # --- capture flow per device ----------------------------------------
@@ -135,11 +157,17 @@ capture_one() {
   xcrun simctl spawn "$udid" defaults delete "$BUNDLE_ID" hasSeenOnboarding >/dev/null 2>&1 || true
   xcrun simctl terminate "$udid" "$BUNDLE_ID" 2>/dev/null || true
 
+  echo "  releasing port 8770 from any other booted sims..."
+  release_port_from_other_sims "$udid"
+
   echo "  launching..."
   xcrun simctl launch "$udid" "$BUNDLE_ID" >/dev/null
   sleep 3
 
-  wait_for_server
+  if ! wait_for_server; then
+    echo "  ! automation server never came up on $name — skipping" >&2
+    return 1
+  fi
 
   # Skip the onboarding warning visually — we capture the post-onboarding
   # experience. Reviewers see the safety story via the App Store listing.
@@ -164,9 +192,76 @@ capture_one() {
   shot "$udid" "$outdir" "04_breathe_session"
 
   api_post "/tap" '{"id":"session.exit"}'
+  sleep 2
+
+  # FOCUS at flicker on-frame. 40 Hz on-phase is too short to time
+  # via /state polling (12.5 ms vs ~150 ms screenshot dispatch), so we
+  # use burst capture: 8 screenshots back-to-back, then pick by
+  # measured pixel luminance. FOCUS's bright amber (#F5A623, luminance
+  # ~167) gives a sharp signal vs the black off-frames (~0).
+  api_post "/session/start" '{"state":"focus","duration":"five"}'
+  sleep 4   # wait through 3 s fade-in
+  capture_at_on_phase "$udid" "$outdir" "05_focus_flash"
+  api_post "/tap" '{"id":"session.exit"}'
   sleep 1
 
   echo "  done. files in $outdir"
+}
+
+# Capture an on-frame of the visual flicker via burst-capture.
+#
+# Why this approach: polling /state for flickerPhase=true and snapping
+# afterwards has a 200–400 ms overhead between the "on" signal and the
+# actual capture (curl + python parse + simctl dispatch). At 2 Hz the
+# on-phase is only 250 ms, so polling consistently misses.
+#
+# Burst-capture sidesteps the timing problem: take 8 screenshots
+# back-to-back (~150 ms each, ~1.2 s total), covering 2.4 cycles at
+# 2 Hz so several on-frames are guaranteed to be in the burst. Then
+# pick the largest file by byte size. PNG compresses dark uniform
+# frames much smaller than frames with vivid color, so the on-frame
+# is reliably the largest file in the burst.
+capture_at_on_phase() {
+  local udid="$1"
+  local outdir="$2"
+  local name="$3"
+  local full="$outdir/${name}.png"
+  local thumb="$outdir/${name}-thumb.png"
+
+  local burst_dir="${outdir}/.burst"
+  mkdir -p "$burst_dir"
+  rm -f "$burst_dir"/*.png
+
+  for i in $(seq 1 8); do
+    xcrun simctl io "$udid" screenshot "$burst_dir/burst_${i}.png" >/dev/null 2>&1
+  done
+
+  # Pick the brightest of the burst by ACTUAL average pixel luminance
+  # (not file size — PNG compresses uniform low-saturation colors like
+  # SLEEP's ember red almost identically to uniform black, which would
+  # break a size-based picker). The Swift helper measures perceived
+  # luminance and prints the brightest path.
+  local best
+  best=$(swift "$REPO_ROOT/scripts/pick_brightest.swift" "$burst_dir"/burst_*.png 2>/dev/null)
+  if [ -z "$best" ] || [ ! -f "$best" ]; then
+    echo "    ! $name: brightness picker failed; falling back to largest file" >&2
+    best=$(ls -S "$burst_dir"/burst_*.png 2>/dev/null | head -1)
+  fi
+  if [ -z "$best" ]; then
+    echo "    ! $name: burst capture produced no files" >&2
+    rm -rf "$burst_dir"
+    return
+  fi
+
+  cp "$best" "$full"
+  sips -Z 400 "$full" --out "$thumb" >/dev/null
+  # Keep the burst dir on disk for inspection — if the auto-pick is
+  # ever wrong, the user can browse the bursts and rename the right
+  # one. Folder is gitignored along with everything under
+  # Docs/AppStoreScreenshots/.
+  printf "    saved %-12s  full=%s thumb=%s (brightest of 8 burst, kept in .burst)\n" "$name" \
+    "$(du -h "$full" | cut -f1)" \
+    "$(du -h "$thumb" | cut -f1)"
 }
 
 # --- main -----------------------------------------------------------
