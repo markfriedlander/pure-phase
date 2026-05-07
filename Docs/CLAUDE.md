@@ -1,0 +1,152 @@
+# CLAUDE.md — NeuroLight Operational Reference
+*Read this at the start of every session. Every session. No exceptions.*
+
+---
+
+## What This Project Is
+
+NeuroLight is a free iOS app that uses synchronized light flicker, isochronic audio tones, and breath pacing to guide users into specific mental states — focus, calm, and sleep. It is a science-grounded tool, not a wellness content platform. There is no narration, no subscriptions, no accounts, no content library. Think: Lumenate, but free, minimal, and honest about what it is.
+
+The aesthetic is dark and atmospheric — inspired by the William Gibson "Virtual Light" book cover. Warm amber-to-red spectrum light on near-total black. Sparse. Industrial headers, soft body text, slow deliberate motion.
+
+---
+
+## The Collaboration Structure
+
+**Mark** — product owner, creative director, final decision maker on all UX and scope questions. Has domain knowledge of breathwork and meditation practices. Asks questions before committing to directions.
+
+**Strategic Claude** (claude.ai) — the thinking partner. Design decisions, architecture discussions, spec writing, and reviewing Claude Code's output happen there. When something is ambiguous or consequential, check the spec or ask Mark before proceeding.
+
+**Claude Code (you)** — the builder. You implement what has been specified and discussed. You do not invent scope. You do not make consequential decisions alone. You read before you write, you ask before you assume, and you deliver complete implementations.
+
+---
+
+## Working Rules
+
+**1. Read before touching.**
+Read every relevant file before modifying anything. Understanding existing code before changing it is not optional.
+
+**2. Discuss before building anything consequential.**
+A sentence describing your plan costs nothing. A misaligned implementation costs hours. On anything non-trivial, state your approach and wait for confirmation before writing code.
+
+**3. Complete implementations only.**
+No stubs. No placeholders. No `// TODO` comments left in delivered code. If something can't be completed in a session, say so explicitly and document the stopping point in HANDOFF_BRIEF.
+
+**4. Use the LEGO Block System for all file delivery.**
+All files are delivered in clearly marked blocks:
+```
+// ========== BLOCK N: DESCRIPTION - START ==========
+[code]
+// ========== BLOCK N: DESCRIPTION - END ==========
+```
+Maximum ~100 lines per block. Announce block count before starting. Wait for confirmation before proceeding to next block if Mark requests it.
+
+**5. Update documents as part of every session.**
+HANDOFF_BRIEF.md gets updated at the end of every meaningful work session. HISTORY.md gets a new entry for every meaningful change. NEXT.md gets updated to reflect current priority order. Code without document updates is an incomplete session.
+
+**6. Flag uncertainty before building.**
+If something in the spec is unclear, ask. If two approaches are equally valid and the choice matters, present them and ask. Confident wrong implementations are more expensive than clarifying questions.
+
+**7. The documents are ground truth.**
+When code and documents disagree, the code gets fixed. When you are uncertain about scope or direction, the spec wins. When the spec is silent, ask Mark.
+
+**8. Ask before inventing.**
+If something isn't specified, don't invent it. Ask. This is especially important for: UI layout details, audio parameters, animation specifics, and anything touching the breath guide.
+
+---
+
+## Engineering Principles
+
+**One clock rules everything.**
+`SessionEngine` is the single timing source for the entire session. Light flicker, isochronic audio pulses, and breath guide animation all derive from it. Nothing else has its own timer during a session. This is non-negotiable.
+
+**Use CADisplayLink, not Timer.**
+The nested recursive Timer approach in the original code is replaced. Use `CADisplayLink` or high-resolution `DispatchSourceTimer`. Compute flicker state mathematically from elapsed time — don't rely on callback timing accuracy.
+
+**Audio is first-class.**
+The isochronic tone engine is as important as the visual flicker. Isochronic tones = audible carrier frequency pulsed at the brainwave rate. The original `createTone()` generating a sub-audible sine wave at the brainwave frequency is wrong and must be replaced.
+
+**Synchronization is the product.**
+Light and audio pulses must be phase-aligned from the same clock source. If they drift, the app is broken.
+
+**Prefer clarity over cleverness.**
+This codebase will be read and extended. Name things for what they are. Structure follows the file architecture in the spec.
+
+**iOS 26 with Mac Catalyst.**
+All legacy `#if os(macOS)` AppKit branches are removed. This is an iOS 26+ app, primarily iPhone, that also runs on Mac via Mac Catalyst (presents as if it were an iPad). No native AppKit code. Catalyst-specific behavior, when needed, uses `#if targetEnvironment(macCatalyst)` — not `#if os(macOS)`.
+
+---
+
+## What This Project Does Not Build
+
+Do not add any of the following, ever, without explicit discussion and approval from Mark:
+
+- Guided narration or voice content
+- Session history, journaling, or streaks
+- User accounts or sign-in of any kind
+- Push notifications or reminders
+- HealthKit integration (future scope, not now)
+- Subscription or paywall logic
+- Analytics, telemetry, or tracking
+- iPad-specific layout (future scope)
+- Social or sharing features
+- CloudKit sync (the UserDefaults iCloud suite name bug in original code is a bug, not a feature)
+
+---
+
+## The File Architecture
+
+```
+NeuroLight/
+├── App/
+│   └── NeuroLightApp.swift
+├── Models/
+│   ├── BrainwaveState.swift
+│   ├── BreathPattern.swift
+│   └── SessionConfig.swift
+├── Engine/
+│   ├── SessionEngine.swift
+│   ├── AudioEngine.swift
+│   └── TorchController.swift
+├── Views/
+│   ├── HomeView.swift
+│   ├── SessionConfigView.swift
+│   ├── SessionView.swift
+│   ├── BreathGuideView.swift
+│   ├── AdvancedView.swift
+│   ├── OnboardingView.swift
+│   └── Components/
+│       ├── IntentTileView.swift
+│       └── GradientProgressRing.swift
+└── Utilities/
+    └── AppStorage+Keys.swift
+```
+
+Build in this order: Models → Engine → Views (Home → Config → Session → Advanced → Onboarding).
+
+---
+
+## The Three Primary States
+
+| Intent | Hz | Evidence |
+|--------|-----|---------|
+| FOCUS | 40Hz | MIT/Nature 2024; active clinical trials |
+| CALM | 10Hz | Decades of Alpha EEG literature |
+| SLEEP | 2Hz | Delta sleep architecture research |
+
+Advanced states (Theta, SMR, Psychedelic, Void, Custom) are behind the Advanced panel with appropriate "less studied" framing.
+
+---
+
+## Reference Documents
+
+- **HANDOFF_BRIEF.md** — read first. Current state and immediate next step.
+- **MEMORY.md** — architectural decisions and their rationale.
+- **HISTORY.md** — chronological log of what was built and why.
+- **NEXT.md** — current priorities and guardrails for the next pass.
+- **neurolight_design_spec.md** — the full product specification. The authoritative source.
+
+---
+
+*NeuroLight — Version 1.0 spec, May 2026.*
+*Written in collaboration between Mark and Strategic Claude.*
