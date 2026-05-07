@@ -86,6 +86,14 @@ TorchController
 
 **Apple App Store compliance:** Apple requires apps to not misrepresent accessibility, not to be universally accessible. A free indie app with an accurate prominent warning, a genuinely accessible alternate mode (BREATHE), respect for explicit user signals (Reduce Motion), and a 17+ rating is acceptable.
 
+### Decision: CC must never read full-size image files
+**Date:** May 2026
+**Decision:** A hard rule, documented in `CLAUDE.md` under "Image Handling Rule": Claude Code must never use the `Read` tool on files ending `.png`, `.jpg`, `.jpeg`, `.gif`, `.heic`, `.heif`, `.bmp`, or `.webp`, with one exception — files whose name ends `-thumb.png`.
+**Rationale:** Reading an image pipes the decoded bytes through the conversation. iPhone simulator screenshots are ~3 MB each at full device resolution. Several Pure Phase sessions crashed and required recovery when CC tried to "verify" rendered output by reading full-size PNGs. Multiple incidents, same root cause.
+**Pattern:** Any image-producing pipeline (screenshot capture, render scripts) must produce a `-thumb.png` companion at max dimension 400 px via `sips -Z 400`. The user reviews the full-size in Finder; CC reads the thumbnail only when explicitly asked to verify a specific image.
+**Methodology:** Three safe approaches to visual verification — (1) ask the user to look in Finder, (2) read a thumbnail, (3) trust the code. Spelled out in CLAUDE.md.
+**Cross-project applicability:** This is a constraint of how images flow through Claude Code conversations, not project-specific. Future projects on any topic should adopt the same rule. Worth surfacing to other Claude Code sessions and to Anthropic as a real ergonomic finding.
+
 ### Decision: Project renamed NeuroLight → Pure Phase
 **Date:** May 2026
 **Decision:** Public name of the app is **Pure Phase**. Bundle identifier `com.MarkFriedlander.PurePhase`. Display name (CFBundleDisplayName) "Pure Phase". Wordmark text in Onboarding/Home/Advanced reads "PURE PHASE". GitHub repo at `markfriedlander/pure-phase`. Pages live at `https://markfriedlander.github.io/pure-phase/{privacy,support}.html`.

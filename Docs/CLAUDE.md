@@ -138,6 +138,44 @@ Advanced states (Theta, SMR, Psychedelic, Void, Custom) are behind the Advanced 
 
 ---
 
+## Image Handling Rule (HARD)
+
+**Never use the `Read` tool on a file ending `.png`, `.jpg`, `.jpeg`, `.gif`, `.heic`, `.heif`, `.bmp`, or `.webp`** — with one explicit exception: a file whose name ends `-thumb.png`.
+
+### Why this rule exists
+
+Reading an image file pipes the decoded image bytes through the conversation. iPhone simulator screenshots are roughly 3 MB each at full device resolution (1206×2622 ≈ 3,164,532 pixels). Several times during Pure Phase development, reading a full-size PNG into the conversation broke the session — context bloat, recovery required, lost work.
+
+### How to verify visual output safely
+
+Three options, in order of preference:
+
+1. **Ask the user to look at the file in Finder.** They have eyes; I don't need to look at the rendered output to know if my code is right. ("Open `Docs/AppStoreScreenshots/iphone-6.9/01_home.png` and tell me if the four tiles are correctly ordered.")
+
+2. **Read a thumbnail.** Any rendering or screenshot pipeline I build must produce a `-thumb.png` companion file at max dimension 400 px (~100–200 KB) via `sips -Z 400 input.png --out input-thumb.png`. The macOS built-in `sips` tool is reliable, no dependencies. The thumbnail is small enough to read without bloating context.
+
+3. **Trust the code.** If I rendered something with explicit parameters (font size 192, stroke width 9, radial gradient stops at 0/30/65/100%), I do not need to look at the result to know what it is. If the code compiles and the parameters are right, the output is right. Visual confirmation is the user's job.
+
+### Pattern for any pipeline that produces images
+
+When writing code that captures or renders images, always include a thumbnail step:
+
+```bash
+xcrun simctl io "$udid" screenshot "$full"
+sips -Z 400 "$full" --out "${full%.png}-thumb.png" >/dev/null
+```
+
+Or in any script: full-size next to thumbnail, never one without the other. The user reviews the full-size; I read the thumbnail only when the user explicitly asks me to verify a specific shot.
+
+### What this looks like in practice
+
+- **Don't:** "Let me check what that rendered as" → `Read /Users/.../screenshot.png` → CRASH
+- **Do:** "Saved to `Docs/AppStoreScreenshots/iphone-6.9/01_home.png` (3 MB) and `01_home-thumb.png` (150 KB). The full-size is ready for App Store Connect; want me to spot-check the thumb, or will you review in Finder?"
+
+This rule applies to every Claude Code session on every project. **Not just Pure Phase.** The crashes are a constraint of how images flow through the conversation, not a project-specific quirk.
+
+---
+
 ## Reference Documents
 
 - **HANDOFF_BRIEF.md** — read first. Current state and immediate next step.
