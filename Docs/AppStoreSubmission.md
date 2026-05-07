@@ -29,13 +29,10 @@ Apple Developer membership expires in **22 days** from May 2026 (per the develop
 - [x] App Store Connect "New App" listing created (Pure Phase / iOS / English (U.S.) / SKU purephase / Full Access)
 - [x] App Information → Primary Category: **Health & Fitness**
 - [x] App Information → Secondary Category: **Lifestyle**
+- [x] App Information → Subtitle: **"Breathe. Focus. Calm. Sleep."** (28 chars — order matches the home-tile order Mark chose)
 - [x] (Saved to App Store Connect)
 
 ### Pending on App Information page
-- [ ] **Subtitle** (30 char max). Awaiting Mark's pick from:
-  - "Focus. Calm. Sleep. Breathe." (28 chars — mirrors the four home tiles in order)
-  - "Light, sound, breath. Free." (27 chars — emphasizes mechanism + that it's free)
-  - or his own choice
 - [ ] **Content Rights** — click "Set Up Content Rights Information" → answer "Does your app contain, show, or access third-party content?" → **No** (we synthesize all audio, generate all visuals, no licensed content)
 
 ### Pending on App Privacy page (sidebar → TRUST & SAFETY → App Privacy)
