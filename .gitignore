@@ -37,6 +37,10 @@ secrets.json
 # (Reintroduce specific ones to git as needed by overriding here.)
 Docs/Screenshots/
 
+# Generated App Store screenshots — produced by scripts/capture_screenshots.sh.
+# These are build artifacts; only the script that produces them is tracked.
+Docs/AppStoreScreenshots/
+
 # Editor / OS junk
 *.log
 *~

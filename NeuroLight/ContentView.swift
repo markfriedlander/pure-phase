@@ -15,6 +15,12 @@ struct ContentView: View {
     @State private var navPath = NavigationPath()
     @State private var presentingConfig: SessionConfig? = nil
 
+    /// Cold-start fade-in. SwiftUI initializes this once when the
+    /// WindowGroup creates ContentView; navigating around the app
+    /// doesn't re-fire it. The first view the user sees rises gently
+    /// out of black instead of snapping in.
+    @State private var hasAppeared: Bool = false
+
     @Bindable private var bus = AutomationBus.shared
 
     var body: some View {
@@ -52,6 +58,7 @@ struct ContentView: View {
                     .transition(.opacity)
             }
         }
+        .opacity(hasAppeared ? 1 : 0)
         .animation(.easeInOut(duration: 0.6), value: hasSeenOnboarding)
         .preferredColorScheme(.dark)
         .onChange(of: bus.requestedConfigState) { _, newValue in
@@ -85,6 +92,11 @@ struct ContentView: View {
         }
         .onAppear {
             bus.currentScreen = hasSeenOnboarding ? "home" : "onboarding"
+            // Slow rise from black on first render — matches the rest
+            // of the motion language (nothing snaps).
+            withAnimation(.easeOut(duration: 1.2)) {
+                hasAppeared = true
+            }
         }
         .onChange(of: hasSeenOnboarding) { _, seen in
             bus.currentScreen = seen ? "home" : "onboarding"
