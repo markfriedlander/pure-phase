@@ -10,6 +10,23 @@
 #   iPhone 6.9"   1320 × 2868   (iPhone 17 Pro Max — auto-scales smaller iPhones)
 #   iPad 13"      2064 × 2752   (iPad Pro 13" M5  — auto-scales smaller iPads)
 #
+# IMPORTANT: As of the May 2026 submission, App Store Connect's iPhone slot
+# (labeled "6.5\" Display") REJECTS the native 1320 × 2868 capture. The slot
+# only accepts 1242 × 2688 (6.5") or 1284 × 2778 (6.7"). The iPad 2064 × 2752
+# capture WAS accepted as-is.
+#
+# Workaround used at submission time: downsample the four iPhone PNGs to
+# 1284 × 2778 (closest match, smallest distortion since aspect ratios differ
+# by only ~0.4%) using sips before uploading:
+#
+#   for f in iphone-6.9/*.png; do
+#     sips -z 2778 1284 "$f" --out "iphone-6.9/resized/$(basename $f)"
+#   done
+#
+# Apple's UI labels likely lag behind the latest device generation. If a
+# future iOS introduces a new iPhone size that's accepted natively, drop
+# the resize step. Until then, plan on resizing iPhone shots before upload.
+#
 # We capture 4 screens (the only visually distinctive ones — entrainment
 # session screens are repetitive across Focus/Calm/Sleep so we don't
 # duplicate them):

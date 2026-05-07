@@ -55,6 +55,9 @@ Apple Developer membership expires in **22 days** from May 2026 (per the develop
 - [ ] **Marketing URL** (optional) — same Pages site root or skip
 - [ ] **Privacy Policy URL** — `https://markfriedlander.github.io/pure-phase/privacy.html` (already live, HTTP 200 verified)
 - [ ] **Screenshots** — 6 files in `Docs/AppStoreScreenshots/` (4 iPhone-6.9, 2 iPad-13). Mark's selection from earlier — these are final.
+  - **Gotcha discovered at upload time:** App Store Connect's iPhone slot (labeled "6.5\" Display") REJECTS the native 1320 × 2868 capture. Accepted sizes are 1242 × 2688 (6.5") or 1284 × 2778 (6.7"). iPad 2064 × 2752 WAS accepted as-is.
+  - Workaround used: downsampled the 4 iPhone PNGs to 1284 × 2778 via `sips -z 2778 1284 SRC.png --out resized/SRC.png` (closest match; aspect ratios differ by only ~0.4%, no visible distortion). Output landed in `iphone-6.9/resized/`. Those uploaded cleanly.
+  - Documented in the header of `scripts/capture_screenshots.sh` so the next submission knows.
 - [ ] **App Icon** — comes automatically from the uploaded build's asset catalog. No separate upload needed.
 
 ### Pending: Age Rating questionnaire

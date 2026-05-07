@@ -133,6 +133,8 @@ The script drives the simulator via the debug HTTP automation server and capture
 
 For each PNG, a companion `*-thumb.png` is produced via `sips -Z 400` for safe inspection without bloating context. The full-size files are what get uploaded to App Store Connect; thumbnails are for quick previewing or for any agent that needs to verify content programmatically.
 
+**Heads up on iPhone size:** at the May 2026 submission, App Store Connect's iPhone slot rejected the native 1320 × 2868 capture and only accepted 1242 × 2688 or 1284 × 2778. Workaround: `sips -z 2778 1284 SRC.png --out resized/SRC.png` for each iPhone PNG before upload. iPad shots were accepted as-is. Apple's UI labels likely lag the latest device generation; revisit when a new iPhone size becomes natively accepted.
+
 Output goes to `Docs/AppStoreScreenshots/` (gitignored).
 
 If you ever extend the script to add a 6th shot or change the lineup, keep the output count low — App Store reviewers prefer 3–5 distinctive shots over 10 redundant ones.
