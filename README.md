@@ -127,4 +127,6 @@ Pre-1.0 development. Working on iPhone (tested on iPhone 16 Plus running iOS 26.
 
 ## License
 
-To be determined.
+The source code in this repository is released under the **MIT License**. See [LICENSE](LICENSE) for the full text. In short: do anything you want with the code, just keep the copyright notice intact, and don't expect a warranty.
+
+The name **Pure Phase**, the app icon (warm radial pulse), and the visual identity (warm-amber-on-black aesthetic, "PURE PHASE" wordmark) are not covered by the MIT license — those are project branding. If you fork this code to ship your own app, please use a different name and a different icon. The MIT terms cover the code, not the brand.
