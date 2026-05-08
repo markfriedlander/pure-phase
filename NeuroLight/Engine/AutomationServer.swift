@@ -290,7 +290,7 @@ final class AutomationServer {
             bus.popToRootTicket += 1
         case "advanced":
             bus.requestedRoute = .advanced
-        case "focus", "calm", "sleep", "theta", "smr", "psychedelic", "void", "custom", "breathwork":
+        case "focus", "calm", "sleep", "theta", "smr", "prism", "void", "custom", "breathwork":
             bus.requestedConfigState = to
         default:
             return .badRequest

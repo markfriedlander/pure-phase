@@ -137,7 +137,7 @@ Build in this order: Models → Engine → Views (Home → Config → Session �
 | CALM | 10Hz | Decades of Alpha EEG literature |
 | SLEEP | 2Hz | Delta sleep architecture research |
 
-Advanced states (Theta, SMR, Psychedelic, Void, Custom) are behind the Advanced panel with appropriate "less studied" framing.
+Advanced states (Theta, SMR, PRISM, Void, Custom) are behind the Advanced panel with appropriate "less studied" framing. PRISM was renamed from Psychedelic in 2.0; behavior is unchanged. DRIFT and BLOOM (psychoacoustic audio-only and audio-plus-visual modes) join Advanced in 2.0 — see PurePhase2.0Spec.md.
 
 ---
 

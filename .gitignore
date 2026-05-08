@@ -46,3 +46,7 @@ Docs/AppStoreScreenshots/
 *~
 .idea/
 .vscode/
+
+# Local screen recordings (kept on disk, not version controlled)
+Docs/ScreenRecording*
+*.mp4

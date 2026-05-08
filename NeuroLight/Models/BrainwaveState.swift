@@ -117,9 +117,14 @@ extension BrainwaveState {
         carrierHz: 196.0
     )
 
-    static let psychedelic = BrainwaveState(
-        id: "psychedelic",
-        displayName: "PSYCHEDELIC",
+    // PRISM (renamed from Psychedelic in 2.0). Behavior identical —
+    // 8 Hz, ±20% drift on a 15 s cycle, warm hue rotation. Renamed for
+    // a cleaner one-syllable tile label and to avoid the loaded
+    // connotations of the prior name. Identifier changed too so all
+    // string-keyed lookups and the automation surface use "prism".
+    static let prism = BrainwaveState(
+        id: "prism",
+        displayName: "PRISM",
         hz: 8.0,
         description: "Visual drift in the theta range. Experiential, not clinical.",
         evidenceTier: .advanced,
@@ -170,7 +175,7 @@ extension BrainwaveState {
     )
 
     static let primary: [BrainwaveState] = [.focus, .calm, .sleep]
-    static let advanced: [BrainwaveState] = [.theta, .smr, .psychedelic, .voidState, .custom]
+    static let advanced: [BrainwaveState] = [.theta, .smr, .prism, .voidState, .custom]
     static let all: [BrainwaveState] = primary + advanced + [.breathwork]
 
     static func state(forID id: String) -> BrainwaveState? {

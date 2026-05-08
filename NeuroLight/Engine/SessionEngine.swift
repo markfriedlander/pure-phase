@@ -261,8 +261,9 @@ final class SessionEngine {
         return 1
     }
 
-    /// Most states use a fixed Hz. Psychedelic mode wobbles ±20% on a
-    /// 15-second cycle — kept from the original app per spec.
+    /// Most states use a fixed Hz. PRISM mode (renamed from Psychedelic
+    /// in 2.0) wobbles ±20% on a 15-second cycle — kept from the
+    /// original app per spec.
     private func computeEffectiveHz(state: BrainwaveState, elapsed t: TimeInterval) -> Double {
         guard state.driftEnabled else { return state.hz }
         let drift = 1.0 + 0.2 * sin(t * 2 * .pi / 15.0)

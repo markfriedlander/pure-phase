@@ -47,7 +47,7 @@ struct IntentTileView: View {
         case "sleep":       return "Sleep — 2 hertz visual flicker, delta frequency"
         case "theta":       return "Theta — 6 hertz, advanced"
         case "smr":         return "SMR — 13.5 hertz, advanced"
-        case "psychedelic": return "Psychedelic — 8 hertz, advanced"
+        case "prism":       return "PRISM — 8 hertz, advanced"
         case "void":        return "Void — half hertz, experimental"
         case "custom":      return "Custom — user-defined frequency, advanced"
         default:            return state.displayName

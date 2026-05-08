@@ -51,7 +51,7 @@ struct SessionView: View {
                     }
                 }
                 .opacity(engine.flickerPhase ? engine.brightness : 0)
-                .modifier(PsychedelicHueModifier(active: state.driftEnabled, elapsed: engine.elapsed))
+                .modifier(PrismHueModifier(active: state.driftEnabled, elapsed: engine.elapsed))
                 .ignoresSafeArea()
             }
 
@@ -216,9 +216,9 @@ struct SessionView: View {
     }
 }
 
-/// Optional warm hue drift for Psychedelic state. Stays in the
-/// red-orange-magenta range — never blue or green.
-private struct PsychedelicHueModifier: ViewModifier {
+/// Optional warm hue drift for PRISM state (renamed from Psychedelic
+/// in 2.0). Stays in the red-orange-magenta range — never blue or green.
+private struct PrismHueModifier: ViewModifier {
     let active: Bool
     let elapsed: TimeInterval
     func body(content: Content) -> some View {

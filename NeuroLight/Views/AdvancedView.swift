@@ -3,8 +3,9 @@
 //  AdvancedView.swift
 //  NeuroLight
 //
-//  Five tiles for the exploratory states: Theta, SMR, Psychedelic,
-//  Void, Custom. Same single-tap-to-start / long-press-for-config
+//  Five tiles for the exploratory states: Theta, SMR, PRISM (renamed
+//  from Psychedelic in 2.0), Void, Custom. Same single-tap-to-start
+//  / long-press-for-config
 //  pattern as Home. A muted disclaimer at the top reminds the user
 //  these states have less photic-entrainment evidence behind them.
 //
@@ -55,7 +56,7 @@ struct AdvancedView: View {
                         Divider().background(Color.white.opacity(0.06))
                         tile(state: .smr,          symbol: "circle.dotted")
                         Divider().background(Color.white.opacity(0.06))
-                        tile(state: .psychedelic,  symbol: "swirl.circle.righthalf.filled")
+                        tile(state: .prism,        symbol: "swirl.circle.righthalf.filled")
                         Divider().background(Color.white.opacity(0.06))
                         tile(state: .voidState,    symbol: "circle")
                         Divider().background(Color.white.opacity(0.06))

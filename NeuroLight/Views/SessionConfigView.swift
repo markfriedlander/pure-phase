@@ -420,7 +420,7 @@ struct SessionConfigView: View {
         case "sleep":       return "moon.fill"
         case "theta":       return "sparkles"
         case "smr":         return "circle.dotted"
-        case "psychedelic": return "swirl.circle.righthalf.filled"
+        case "prism":       return "swirl.circle.righthalf.filled"
         case "void":        return "circle"
         case "breathwork":  return "wind"
         default:            return "slider.horizontal.3"
