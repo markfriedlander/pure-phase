@@ -59,9 +59,21 @@ struct SessionView: View {
                 .ignoresSafeArea()
             }
 
-            // BREATHWORK HALO — soft warm radial behind the ring,
-            // pulsing very gently with the breath. Halo (ii) per Mark.
-            if breathOnly {
+            // BLOOM RESPONSIVE BACKGROUND — full-screen radial bloom
+            // driven by the audio synthesis LFO phases. Replaces the
+            // halo for BLOOM specifically; halo still applies to
+            // BREATHWORK and DRIFT (where it's the only background).
+            if state.isBloom {
+                BloomBackgroundView(
+                    driftState: engine.driftAudio.state,
+                    envelope: engine.brightness
+                )
+            }
+
+            // BREATHWORK / DRIFT HALO — soft warm radial behind the ring,
+            // pulsing very gently with the breath. Not used for BLOOM
+            // since BLOOM has its own richer responsive background.
+            if breathOnly && !state.isBloom {
                 RadialGradient(
                     colors: [
                         state.sessionTint.startColor.opacity(0.18 + 0.05 * engine.breathPhase),
@@ -74,8 +86,16 @@ struct SessionView: View {
                 .allowsHitTesting(false)
             }
 
-            // BREATH GUIDE — overlay in entrainment, centerpiece in breathwork.
+            // BREATH GUIDE — overlay in entrainment, centerpiece in
+            // breathwork. On BLOOM the breath ring rides at reduced
+            // opacity so the responsive bloom is the focal point and
+            // the ring is a reference rather than the centerpiece.
             if engine.isRunning && (config.breathEnabled || breathOnly) {
+                let ringOpacity: Double = {
+                    if state.isBloom    { return 0.6 }   // subordinate to bloom
+                    if breathOnly       { return 1.0 }   // BREATHWORK / DRIFT — centerpiece
+                    return 0.85                          // entrainment overlay
+                }()
                 BreathGuideView(
                     phase: engine.breathPhase,
                     stageName: engine.breathStageName,
@@ -83,7 +103,7 @@ struct SessionView: View {
                     elapsed: engine.elapsed,
                     enlarged: breathOnly
                 )
-                .opacity(engine.brightness * (breathOnly ? 1.0 : 0.85))
+                .opacity(engine.brightness * ringOpacity)
                 .allowsHitTesting(false)
             }
 
