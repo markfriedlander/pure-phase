@@ -146,7 +146,7 @@ extension BrainwaveState {
     static let drift = BrainwaveState(
         id: "drift",
         displayName: "DRIFT",
-        hz: 8.0,
+        hz: 2.0,
         description: "Audio-only psychoacoustic experience. Best with headphones.",
         evidenceTier: .advanced,
         sessionTint: SessionTint(startHex: 0xC0392B, endHex: 0x1A0503),
@@ -163,7 +163,7 @@ extension BrainwaveState {
     static let bloom = BrainwaveState(
         id: "bloom",
         displayName: "BLOOM",
-        hz: 8.0,
+        hz: 2.0,
         description: "Audio plus slow responsive visuals. Best with headphones.",
         evidenceTier: .advanced,
         sessionTint: SessionTint(startHex: 0xF5A623, endHex: 0xC0392B),
