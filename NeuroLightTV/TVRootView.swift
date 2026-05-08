@@ -1,45 +1,49 @@
-// ========== BLOCK 37: TVRootView (tvOS placeholder) - START ==========
+// ========== BLOCK 37: TVRootView (router) - START ==========
 //
 //  TVRootView.swift
 //  NeuroLightTV
 //
-//  Placeholder root view for the tvOS target. Real tvOS UI lands in a
-//  follow-up — this file just makes the target compile and run with
-//  visible Pure Phase branding so the project structure can be
-//  verified end-to-end.
+//  Top-level router for the tvOS app. Three states:
+//    1. Onboarding — first-launch safety acknowledgement (same gate
+//       as iOS, but with TV-friendly focus-based interaction).
+//    2. Home — six tiles (BREATHE / FOCUS / CALM / SLEEP / DRIFT /
+//       BLOOM). Single click starts a session with the saved defaults.
+//       No long press, no Advanced, no config — TV is lean-back.
+//    3. Session — full-bleed visual experience, reuses SessionEngine
+//       and the cross-platform display components (BloomBackgroundView,
+//       BreathGuideView, GradientProgressRing).
 //
-//  Per 2.0 spec, the real tvOS UI will be:
-//    Six tiles on a black background — BREATHE / FOCUS / CALM / SLEEP
-//    / DRIFT / BLOOM. Single click to start (no long press, no
-//    Advanced panel, no config). Click again to exit.
+//  Click the Siri Remote during a session to exit. Menu button does
+//  the same.
 //
 
 import SwiftUI
 
 struct TVRootView: View {
+    @AppStorage(StorageKey.hasSeenOnboarding) private var hasSeenOnboarding: Bool = false
+    @State private var presentingConfig: SessionConfig? = nil
+
     var body: some View {
         ZStack {
             Color.black.ignoresSafeArea()
-            VStack(spacing: 28) {
-                RoundedRectangle(cornerRadius: 0.5)
-                    .fill(LinearGradient(
-                        colors: [Color(hex: 0xF5A623),
-                                 Color(hex: 0xE8593C),
-                                 Color(hex: 0xC0392B)],
-                        startPoint: .leading, endPoint: .trailing
-                    ))
-                    .frame(width: 220, height: 1.5)
+            content
+        }
+        .preferredColorScheme(.dark)
+    }
 
-                Text("PURE PHASE")
-                    .font(.system(size: 36, weight: .bold))
-                    .tracking(14)
-                    .foregroundColor(.white)
-
-                Text("tvOS — coming soon")
-                    .font(.system(size: 14, weight: .regular))
-                    .tracking(3)
-                    .foregroundColor(Color(hex: 0x888480))
+    @ViewBuilder
+    private var content: some View {
+        if let cfg = presentingConfig {
+            TVSessionView(config: cfg, onExit: { presentingConfig = nil })
+                .transition(.opacity)
+        } else if hasSeenOnboarding {
+            TVHomeView { state in
+                presentingConfig = SessionConfig.fromAppStorage(state: state)
             }
+            .transition(.opacity)
+        } else {
+            TVOnboardingView { hasSeenOnboarding = true }
+                .transition(.opacity)
         }
     }
 }
@@ -47,4 +51,4 @@ struct TVRootView: View {
 #Preview {
     TVRootView()
 }
-// ========== BLOCK 37: TVRootView (tvOS placeholder) - END ==========
+// ========== BLOCK 37: TVRootView (router) - END ==========
