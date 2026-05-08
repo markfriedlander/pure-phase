@@ -41,6 +41,16 @@ struct SessionConfigView: View {
     @AppStorage(StorageKey.breathAudioCues)     private var breathAudioCues: Bool = StorageDefault.breathAudioCues
     @AppStorage(StorageKey.breathCueVolume)     private var breathCueVolume: Double = StorageDefault.breathCueVolume
 
+    // DRIFT / BLOOM (new in 2.0). Shared between the two states.
+    @AppStorage(StorageKey.driftBloomLayerBreathingCarrier)
+    private var dbLayerBreathingCarrier: Bool = StorageDefault.driftBloomLayerBreathingCarrier
+    @AppStorage(StorageKey.driftBloomLayerPhaseDrift)
+    private var dbLayerPhaseDrift: Bool = StorageDefault.driftBloomLayerPhaseDrift
+    @AppStorage(StorageKey.driftBloomLayerHarmonicShimmer)
+    private var dbLayerHarmonicShimmer: Bool = StorageDefault.driftBloomLayerHarmonicShimmer
+    @AppStorage(StorageKey.driftBloomCarrierHz)
+    private var dbCarrierHz: Double = StorageDefault.driftBloomCarrierHz
+
     @State private var torchProbe = TorchController()
     @Bindable private var bus = AutomationBus.shared
 
@@ -82,23 +92,49 @@ struct SessionConfigView: View {
                         .padding(.horizontal, 40)
                         .lineSpacing(3)
 
-                    if state.isCustom {
-                        sectionHeader("FREQUENCY")
-                        customFrequencySection
-                    }
+                    if state.usesDriftAudioEngine {
+                        // DRIFT and BLOOM share the same psychoacoustic
+                        // config. No flicker, no torch, no isochronic
+                        // volume — the three layers ARE the audio.
+                        Text("Best with headphones")
+                            .font(.system(size: 11, weight: .regular))
+                            .tracking(2)
+                            .foregroundColor(Color(hex: 0x888480))
+                            .padding(.top, -8)
 
-                    sectionHeader("DURATION")
-                    durationPicker
+                        sectionHeader("DURATION")
+                        durationPicker
 
-                    sectionHeader(state.isBreathwork ? "AMBIENT" : "AUDIO")
-                    audioSection
+                        sectionHeader("LAYERS")
+                        driftBloomLayersSection
 
-                    sectionHeader("BREATH")
-                    breathSection
+                        sectionHeader("CARRIER")
+                        driftBloomCarrierSection
 
-                    if !state.isBreathwork {
-                        sectionHeader("VISUAL")
-                        visualSection
+                        sectionHeader("BREATH")
+                        breathSection
+
+                        sectionHeader("AMBIENT")
+                        driftBloomDisabledAmbient
+                    } else {
+                        if state.isCustom {
+                            sectionHeader("FREQUENCY")
+                            customFrequencySection
+                        }
+
+                        sectionHeader("DURATION")
+                        durationPicker
+
+                        sectionHeader(state.isBreathwork ? "AMBIENT" : "AUDIO")
+                        audioSection
+
+                        sectionHeader("BREATH")
+                        breathSection
+
+                        if !state.isBreathwork {
+                            sectionHeader("VISUAL")
+                            visualSection
+                        }
                     }
 
                     Button {
@@ -273,6 +309,85 @@ struct SessionConfigView: View {
                 .buttonStyle(.plain)
             }
         }
+    }
+
+    // MARK: DRIFT / BLOOM sections
+
+    /// Three independent layer toggles. Per spec defaults: Layer 1 +
+    /// Layer 2 ON, Layer 3 OFF (opt-in). Each toggle stays usable
+    /// independently of the others — the user can solo any layer.
+    private var driftBloomLayersSection: some View {
+        VStack(spacing: 10) {
+            toggleRow("Breathing carrier", isOn: $dbLayerBreathingCarrier)
+            Text("Carrier oscillates ±4 Hz over a 24-second cycle.")
+                .font(.system(size: 10))
+                .foregroundColor(Color(hex: 0x666460))
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+            toggleRow("Phase drift", isOn: $dbLayerPhaseDrift)
+            Text("Sound rotates between the ears over a 40-second cycle. Best with headphones.")
+                .font(.system(size: 10))
+                .foregroundColor(Color(hex: 0x666460))
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+            toggleRow("Harmonic shimmer", isOn: $dbLayerHarmonicShimmer)
+            Text("Adds detuned carriers ±1 Hz that produce slow acoustic beating. Most experiential layer.")
+                .font(.system(size: 10))
+                .foregroundColor(Color(hex: 0x666460))
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .padding(.horizontal, 36)
+    }
+
+    /// DRIFT/BLOOM carrier selector. Same range as the existing
+    /// Custom-state carrier slider (80–440 Hz, 2 Hz step).
+    private var driftBloomCarrierSection: some View {
+        VStack(spacing: 16) {
+            HStack {
+                Text("CARRIER")
+                    .font(.system(size: 9, weight: .medium))
+                    .tracking(2)
+                    .foregroundColor(Color(hex: 0x888480))
+                    .frame(width: 90, alignment: .leading)
+                Spacer()
+                Text("\(Int(dbCarrierHz)) Hz")
+                    .font(.system(size: 12, weight: .semibold, design: .monospaced))
+                    .foregroundColor(.white.opacity(0.92))
+            }
+            Slider(value: $dbCarrierHz, in: 80...440, step: 2)
+                .tint(Color(hex: 0xE8593C))
+                .accessibilityLabel("Carrier frequency")
+                .accessibilityValue("\(Int(dbCarrierHz)) hertz")
+        }
+        .padding(.horizontal, 36)
+    }
+
+    /// Disabled-state ambient picker for DRIFT/BLOOM. Spec calls for
+    /// the picker to be visibly present but greyed out, with copy
+    /// explaining that DRIFT replaces ambient texture rather than
+    /// silently overriding the user's other-state ambient choice.
+    private var driftBloomDisabledAmbient: some View {
+        VStack(spacing: 10) {
+            HStack(spacing: 8) {
+                ForEach(AmbientSoundType.allCases) { t in
+                    Text(t.displayLabel)
+                        .font(.system(size: 10, weight: .semibold))
+                        .tracking(1.5)
+                        .foregroundColor(Color(hex: 0x666460))
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 10)
+                        .background(Color.white.opacity(0.02))
+                }
+            }
+            Text("DRIFT replaces ambient texture — the layers above are the bed.")
+                .font(.system(size: 10))
+                .foregroundColor(Color(hex: 0x666460))
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .opacity(0.5)
+        .allowsHitTesting(false)
+        .padding(.horizontal, 36)
+        .accessibilityHidden(true)
     }
 
     private var breathSection: some View {

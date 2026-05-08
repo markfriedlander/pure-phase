@@ -111,15 +111,26 @@ final class SessionEngine {
         // uses the 1.0 buffer-based AudioEngine.
         usingDriftAudio = config.state.usesDriftAudioEngine
         if usingDriftAudio {
-            // Provisional defaults for DRIFT/BLOOM until the shared
-            // config screen lands. Layer 1 + 2 on, Layer 3 off — per
-            // 2.0 spec defaults.
+            // DRIFT/BLOOM read their per-layer toggles and carrier
+            // frequency directly from UserDefaults — these settings
+            // are shared between the two states (same shared config
+            // screen) and aren't carried in SessionConfig (which
+            // belongs to the 1.0 AudioEngine surface).
+            let d = UserDefaults.standard
+            let layerBC = d.object(forKey: StorageKey.driftBloomLayerBreathingCarrier) as? Bool
+                ?? StorageDefault.driftBloomLayerBreathingCarrier
+            let layerPD = d.object(forKey: StorageKey.driftBloomLayerPhaseDrift) as? Bool
+                ?? StorageDefault.driftBloomLayerPhaseDrift
+            let layerHS = d.object(forKey: StorageKey.driftBloomLayerHarmonicShimmer) as? Bool
+                ?? StorageDefault.driftBloomLayerHarmonicShimmer
+            let carrier = d.object(forKey: StorageKey.driftBloomCarrierHz) as? Double
+                ?? StorageDefault.driftBloomCarrierHz
             driftAudio.start(
-                carrierHz: config.state.carrierHz,
+                carrierHz: carrier,
                 isochronicHz: config.state.hz,
-                layerBreathingCarrier: true,
-                layerPhaseDrift: true,
-                layerHarmonicShimmer: false
+                layerBreathingCarrier: layerBC,
+                layerPhaseDrift: layerPD,
+                layerHarmonicShimmer: layerHS
             )
         } else if config.needsAudio {
             // Start the 1.0 AudioEngine if ANY audio layer is wanted —

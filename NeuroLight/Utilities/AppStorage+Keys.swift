@@ -41,6 +41,15 @@ enum StorageKey {
     static let breathAudioCues     = "breathAudioCues"
     static let breathCueVolume     = "breathCueVolume"
 
+    // DRIFT / BLOOM — shared psychoacoustic-mode config (new in 2.0).
+    // Duration / breath enabled / breath pattern reuse the universal
+    // keys above. These are specific to the three audio layers and
+    // the carrier frequency.
+    static let driftBloomLayerBreathingCarrier = "driftBloomLayerBreathingCarrier"
+    static let driftBloomLayerPhaseDrift       = "driftBloomLayerPhaseDrift"
+    static let driftBloomLayerHarmonicShimmer  = "driftBloomLayerHarmonicShimmer"
+    static let driftBloomCarrierHz             = "driftBloomCarrierHz"
+
     // One-time acknowledgment that user knows about rapid flicker
     // despite having Reduce Motion enabled. Persists once granted.
     static let ackReduceMotion     = "ackReduceMotion"
@@ -78,6 +87,12 @@ enum StorageDefault {
     static let breathAudioCues: Bool   = true   // on by default in breathwork mode
     static let breathCueVolume: Double = 0.7
 
+    // DRIFT / BLOOM defaults (from 2.0 spec §2 / §3).
+    static let driftBloomLayerBreathingCarrier: Bool = true   // Layer 1 ON
+    static let driftBloomLayerPhaseDrift:       Bool = true   // Layer 2 ON
+    static let driftBloomLayerHarmonicShimmer:  Bool = false  // Layer 3 OFF (opt-in)
+    static let driftBloomCarrierHz:             Double = 220.0
+
     /// Resets every persisted Session-config value to its default.
     /// Called by the Restore Defaults button.
     @MainActor
@@ -100,6 +115,10 @@ enum StorageDefault {
         d.set(customBreathExhaleHold, forKey: StorageKey.customBreathExhaleHold)
         d.set(breathAudioCues,    forKey: StorageKey.breathAudioCues)
         d.set(breathCueVolume,    forKey: StorageKey.breathCueVolume)
+        d.set(driftBloomLayerBreathingCarrier, forKey: StorageKey.driftBloomLayerBreathingCarrier)
+        d.set(driftBloomLayerPhaseDrift,       forKey: StorageKey.driftBloomLayerPhaseDrift)
+        d.set(driftBloomLayerHarmonicShimmer,  forKey: StorageKey.driftBloomLayerHarmonicShimmer)
+        d.set(driftBloomCarrierHz,             forKey: StorageKey.driftBloomCarrierHz)
     }
 }
 // ========== BLOCK 7: AppStorage Keys - END ==========
