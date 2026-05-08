@@ -53,6 +53,50 @@
 import AVFoundation
 import Observation
 
+// ========== Sine lookup table (file-scoped, one-time init)
+//
+// libm sin() is too slow on the audio render thread when called per
+// sample at 44.1 kHz × 4 phases (carrier + envelope + breath LFO +
+// drift LFO). The simulator overloaded with the libm path; this LUT
+// version is roughly 10–30× faster per call and brings the render
+// callback well under the audio thread's time budget.
+//
+// 4096 entries × linear interpolation between adjacent entries gives
+// far more resolution than 16-bit audio quantization can preserve —
+// no audible artifacts. Memory cost: 16 KB. Index 4096 holds a copy
+// of index 0 so the linear-interp read at the end of the table never
+// has to do a modulo.
+
+private let kSineLUTSize: Int = 4096
+
+private let sineLUT: [Float] = {
+    var t = [Float](repeating: 0, count: kSineLUTSize + 1)
+    for i in 0...kSineLUTSize {
+        t[i] = Float(sin(2 * Double.pi * Double(i) / Double(kSineLUTSize)))
+    }
+    return t
+}()
+
+/// Sine-from-phase lookup. `phase` MUST be in [0, 1). The caller is
+/// responsible for wrapping (`phase -= floor(phase)`) — no defensive
+/// branch here, since this runs per-sample on the audio thread.
+@inline(__always)
+private func sineLookup(_ phase: Double) -> Float {
+    let scaled = phase * Double(kSineLUTSize)
+    let idx = Int(scaled)
+    let frac = Float(scaled - Double(idx))
+    return sineLUT[idx] + (sineLUT[idx + 1] - sineLUT[idx]) * frac
+}
+
+/// Cosine-from-phase via the same LUT: `cos(2π × p) = sin(2π × (p + 0.25))`.
+/// `phase` MUST be in [0, 1).
+@inline(__always)
+private func cosineLookup(_ phase: Double) -> Float {
+    var p = phase + 0.25
+    if p >= 1.0 { p -= 1.0 }
+    return sineLookup(p)
+}
+
 // ========== Synthesis state — shared across audio render thread and view layer
 
 /// Shared LFO state and parameter inputs for the DRIFT/BLOOM audio
@@ -194,33 +238,17 @@ final class DriftAudioEngine {
             attachShimmer(format: stereoFmt)
         }
 
-        // TODO(2.0): The render callback below is too slow for the iOS
-        // simulator's audio thread budget — it overloads and the audio
-        // system aborts with "Cleanup: RPC timeout. Apparently
-        // deadlocked." Per-sample work currently includes 3-4 sin/cos
-        // calls + a ring-buffer linear interpolation, ~90 k math ops
-        // per render block at 44.1 kHz × 512 frames. Needs at least:
-        //   - Phase-accumulator pattern instead of sin(2π × f × t)
-        //     (avoids precision loss AND eliminates the divide)
-        //   - Sine lookup table (1024 entries linearly interpolated;
-        //     cheaper than libm sin on the audio thread)
-        //   - Possibly vDSP_vsma / vForce for vectorized batches
-        // Real-device performance may differ — A18 cores are much
-        // faster than the simulator's audio emulation. Verify on
-        // device before committing to a specific optimization.
-        // For now, the engine is wired but the actual audio start is
-        // disabled so DRIFT/BLOOM sessions run silently. The
-        // architectural skeleton is correct; this is a tuning gap.
-        let kEnableActualAudio = false
-        if kEnableActualAudio {
-            do {
-                try engine.start()
-                isRunning = true
-            } catch {
-                isRunning = false
-            }
-        } else {
-            isRunning = true   // pretend, so SessionEngine flow continues
+        // The render callback uses a 4096-entry sine LUT and per-source
+        // phase accumulators (see makeCarrierSourceNode below) instead
+        // of libm `sin(2π × f × t)`. This made the difference between
+        // an iOS simulator overload ("Cleanup: RPC timeout. Apparently
+        // deadlocked.") and a clean real-time render. Verified on the
+        // simulator after the optimization.
+        do {
+            try engine.start()
+            isRunning = true
+        } catch {
+            isRunning = false
         }
     }
 
@@ -297,116 +325,139 @@ final class DriftAudioEngine {
         // outside its initial setup.
         let sr = sampleRate
         let driftStateRef = state
+        let isMainNode = (detuneHz == 0)
 
-        // Per-node sample counter. Advanced by frameCount each render.
-        // We need this rather than reading the AVAudioTime because it
-        // gives us a monotonic "session sample" we can use for all phases.
-        nonisolated(unsafe) var sampleCount: UInt64 = 0
+        // Per-node phase accumulators in [0, 1). One full cycle = 1.0.
+        // Phase-accumulator pattern (advancing each sample by f/sr and
+        // wrapping with `-= floor(...)`) avoids the precision-loss
+        // failure mode of `sin(2π × f × t)` for large t (a 1-hour
+        // session at 220 Hz feeds sin() arguments of ~1.4 million,
+        // where Double precision starts to fray).
+        nonisolated(unsafe) var carrierPhase: Double  = 0
+        nonisolated(unsafe) var envelopePhase: Double = 0
+        nonisolated(unsafe) var breathLFOPhase: Double = 0
+        nonisolated(unsafe) var driftLFOPhase: Double  = 0
 
         // Per-node ring buffer for Layer 2 phase-drift delay on R channel.
-        // Size 1024 = ~21 ms at 48 kHz; Layer 2 max delay is ~3.5 ms.
+        // Size 1024 = ~23 ms at 44.1 kHz; Layer 2 max delay is ~3.5 ms.
         // Plenty of margin and a power of 2 makes wrap math fast.
         let ringBufferSize = 1024
         nonisolated(unsafe) var ringBuffer = [Float](repeating: 0, count: ringBufferSize)
         nonisolated(unsafe) var ringWriteIdx: Int = 0
+
+        // LFO rates (Hz) — stored once, not recomputed per render block.
+        let breathLfoHz: Double = 1.0 / 24.0   // 0.0417 Hz
+        let driftLfoHz:  Double = 1.0 / 40.0   // 0.0250 Hz
+
+        // LFO depths
+        let breathDepthHz: Double = 4.0        // ±4 Hz around carrier
+        let maxDelaySamples: Double = 0.0035 * sr  // 3.5 ms
+
+        // Per-sample LFO phase increments (cycles per sample).
+        let breathInc = breathLfoHz / sr
+        let driftInc  = driftLfoHz  / sr
 
         return AVAudioSourceNode(format: format) { _, _, frameCount, audioBufferList -> OSStatus in
             // Snapshot shared parameters once per render block. Reading
             // them per-sample would be wasteful — they're slow-moving.
             // Tearing is irrelevant: we get a consistent value within
             // the block, which is all the synthesis needs.
-            let baseCarrier  = driftStateRef.carrierHz
-            let isoHz        = driftStateRef.isochronicHz
-            let breathOn     = driftStateRef.layerBreathingCarrier
-            let driftOn      = driftStateRef.layerPhaseDrift
+            let baseCarrier = driftStateRef.carrierHz
+            let isoHz       = driftStateRef.isochronicHz
+            let breathOn    = driftStateRef.layerBreathingCarrier
+            let driftOn     = driftStateRef.layerPhaseDrift
 
-            // LFO rates (Hz)
-            let breathLfoHz: Double = 1.0 / 24.0   // 0.0417 Hz
-            let driftLfoHz:  Double = 1.0 / 40.0   // 0.0250 Hz
-
-            // LFO depths
-            let breathDepthHz: Double = 4.0        // ±4 Hz around carrier
-            let maxDelaySamples: Double = 0.0035 * sr  // 3.5 ms at sr
+            // Per-sample increments for envelope and (nominal) carrier.
+            // The carrier increment changes per sample when the breath
+            // LFO is active (since effective frequency varies); without
+            // breath LFO it's constant.
+            let envelopeInc = isoHz / sr
 
             let abl = UnsafeMutableAudioBufferListPointer(audioBufferList)
-            // We require stereo output (channels = 2).
             guard abl.count >= 2 else { return noErr }
             let outL = abl[0].mData!.assumingMemoryBound(to: Float.self)
             let outR = abl[1].mData!.assumingMemoryBound(to: Float.self)
 
-            for frame in 0..<Int(frameCount) {
-                let n = Double(sampleCount &+ UInt64(frame))
-                let t = n / sr
+            let ringSizeD = Double(ringBufferSize)
+            let frameCountInt = Int(frameCount)
 
-                // Layer 1: breathing-carrier LFO (sin, 24 s cycle)
-                // phase in [0, 1)
-                let breathPhase = (t * breathLfoHz).truncatingRemainder(dividingBy: 1.0)
-                let breathOffsetHz = breathOn
-                    ? sin(2 * .pi * breathPhase) * breathDepthHz
-                    : 0.0
+            for frame in 0..<frameCountInt {
+                // Layer 1: breathing-carrier LFO drives the carrier
+                // frequency offset. ±4 Hz around base over a 24 s cycle.
+                let breathOffsetHz: Double
+                if breathOn {
+                    breathOffsetHz = Double(sineLookup(breathLFOPhase)) * breathDepthHz
+                } else {
+                    breathOffsetHz = 0
+                }
 
-                // Effective carrier this sample
-                let effectiveCarrier = baseCarrier + breathOffsetHz + detuneHz
+                // Effective carrier this sample (Hz) → per-sample phase
+                // increment in cycles. Phase accumulates without precision
+                // drift over arbitrary session length.
+                let effectiveCarrierHz = baseCarrier + breathOffsetHz + detuneHz
+                let carrierInc = effectiveCarrierHz / sr
 
-                // Carrier waveform sample. Pure sine.
-                let carrierSample = sin(2 * .pi * effectiveCarrier * t)
+                // Carrier sample via LUT.
+                let carrierSample = sineLookup(carrierPhase)
 
-                // Isochronic AM envelope: half-sine pulses at isoHz.
-                // This approximates the envelope used in AudioEngine —
-                // a soft-edged pulse rather than square. clamp(sin, 0, 1)
-                // gives one half-cycle of sine per period.
-                // Final shape will be tuned during integration; for
-                // scaffolding, a half-rectified sine is correct enough.
-                let envSample = max(0.0, sin(2 * .pi * isoHz * t))
+                // Isochronic AM envelope: half-rectified sine at isoHz.
+                let envRaw = sineLookup(envelopePhase)
+                let envSample = envRaw > 0 ? envRaw : 0
 
-                let mono = Float(carrierSample * envSample)
+                let mono = carrierSample * envSample
+
+                // Advance phases for next sample.
+                carrierPhase  += carrierInc
+                if carrierPhase >= 1.0  { carrierPhase  -= floor(carrierPhase) }
+                envelopePhase += envelopeInc
+                if envelopePhase >= 1.0 { envelopePhase -= floor(envelopePhase) }
+                breathLFOPhase += breathInc
+                if breathLFOPhase >= 1.0 { breathLFOPhase -= floor(breathLFOPhase) }
+                driftLFOPhase += driftInc
+                if driftLFOPhase >= 1.0  { driftLFOPhase -= floor(driftLFOPhase) }
 
                 // Layer 2: phase-drift delay on R channel.
-                // Phase drift LFO (sin, 40 s cycle)
-                let driftPhase = (t * driftLfoHz).truncatingRemainder(dividingBy: 1.0)
-                // delay 0 → maxDelay → 0 over the cycle: use (1 - cos) / 2
-                let normalizedDrift = (1.0 - cos(2 * .pi * driftPhase)) / 2.0
-                let delaySamples = driftOn ? (normalizedDrift * maxDelaySamples) : 0.0
+                // Delay rotates 0 → maxDelay → 0 each cycle: (1 − cos)/2.
+                let normalizedDrift: Double
+                if driftOn {
+                    let cosVal = Double(cosineLookup(driftLFOPhase))
+                    normalizedDrift = (1.0 - cosVal) * 0.5
+                } else {
+                    normalizedDrift = 0
+                }
+                let delaySamples = normalizedDrift * maxDelaySamples
 
-                // Write current mono sample into ring.
+                // Write current sample into ring, then read delayed for R.
                 ringBuffer[ringWriteIdx] = mono
 
-                // Read R from ring at writeIdx - delaySamples (linear interp)
                 let readPos = Double(ringWriteIdx) - delaySamples
-                let readPosWrapped = readPos < 0 ? readPos + Double(ringBufferSize) : readPos
-                let readIdxLow = Int(readPosWrapped) % ringBufferSize
-                let readIdxHigh = (readIdxLow + 1) % ringBufferSize
+                let readPosWrapped = readPos < 0 ? readPos + ringSizeD : readPos
+                let readIdxLow = Int(readPosWrapped) & (ringBufferSize - 1)
+                let readIdxHigh = (readIdxLow + 1) & (ringBufferSize - 1)
                 let frac = Float(readPosWrapped - Double(Int(readPosWrapped)))
-                let rSample = ringBuffer[readIdxLow] * (1 - frac) + ringBuffer[readIdxHigh] * frac
+                let rSample = ringBuffer[readIdxLow] * (1 - frac)
+                            + ringBuffer[readIdxHigh] * frac
 
                 outL[frame] = mono
                 outR[frame] = rSample
 
-                ringWriteIdx = (ringWriteIdx + 1) % ringBufferSize
+                ringWriteIdx = (ringWriteIdx + 1) & (ringBufferSize - 1)
             }
 
-            // Update shared LFO phases (one write per render block).
-            // Visual layer reads these on main thread via TimelineView.
-            // Only the MAIN carrier node should update these — Layer 3
-            // shimmer nodes should not. Detune == 0 IS the main node.
-            if detuneHz == 0 {
-                let lastN = Double(sampleCount &+ UInt64(frameCount))
-                let lastT = lastN / sr
-                driftStateRef.breathingCarrierPhase =
-                    (lastT * breathLfoHz).truncatingRemainder(dividingBy: 1.0)
-                driftStateRef.phaseDriftPhase =
-                    (lastT * driftLfoHz).truncatingRemainder(dividingBy: 1.0)
-                // Harmonic shimmer beat phase: nominally 1 Hz when
-                // shimmer is on. Stays at 0 when off.
+            // Publish LFO phases for the BLOOM visual layer. Only the
+            // main carrier node writes — Layer 3 shimmer nodes are
+            // render-only consumers, so there's a single source of truth.
+            if isMainNode {
+                driftStateRef.breathingCarrierPhase = breathLFOPhase
+                driftStateRef.phaseDriftPhase       = driftLFOPhase
                 if driftStateRef.layerHarmonicShimmer {
-                    driftStateRef.harmonicShimmerPhase =
-                        lastT.truncatingRemainder(dividingBy: 1.0)
+                    // Beat phase mirrors envelope phase (1 Hz nominal).
+                    driftStateRef.harmonicShimmerPhase = envelopePhase
                 } else {
                     driftStateRef.harmonicShimmerPhase = 0
                 }
             }
 
-            sampleCount &+= UInt64(frameCount)
             return noErr
         }
     }

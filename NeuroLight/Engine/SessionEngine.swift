@@ -109,28 +109,18 @@ final class SessionEngine {
         // Audio engine selection. DRIFT and BLOOM use the new real-time
         // synthesis engine (DriftAudioEngine.swift); everything else
         // uses the 1.0 buffer-based AudioEngine.
-        //
-        // TODO(2.0): The DriftAudioEngine render callback is currently
-        // too slow for the iOS simulator's audio thread budget — the
-        // simulator aborts the process with "Cleanup: RPC timeout.
-        // Apparently deadlocked." after a few seconds. Real-device
-        // performance is unverified. Until the render-callback
-        // optimization lands (sin lookup table + phase-accumulator
-        // pattern + reduced per-sample work), DRIFT and BLOOM run
-        // SILENTLY — the visual experience works (black canvas /
-        // breath ring / no flicker) but no audio plays. The engine
-        // wiring is in place; the math just needs to be fast enough.
         usingDriftAudio = config.state.usesDriftAudioEngine
         if usingDriftAudio {
-            // Intentionally NOT calling driftAudio.start here — see
-            // TODO above. Restore once the render callback is optimized.
-            // driftAudio.start(
-            //     carrierHz: config.state.carrierHz,
-            //     isochronicHz: config.state.hz,
-            //     layerBreathingCarrier: true,
-            //     layerPhaseDrift: true,
-            //     layerHarmonicShimmer: false
-            // )
+            // Provisional defaults for DRIFT/BLOOM until the shared
+            // config screen lands. Layer 1 + 2 on, Layer 3 off — per
+            // 2.0 spec defaults.
+            driftAudio.start(
+                carrierHz: config.state.carrierHz,
+                isochronicHz: config.state.hz,
+                layerBreathingCarrier: true,
+                layerPhaseDrift: true,
+                layerHarmonicShimmer: false
+            )
         } else if config.needsAudio {
             // Start the 1.0 AudioEngine if ANY audio layer is wanted —
             // isochronic tone, ambient texture, or breathwork cues.
