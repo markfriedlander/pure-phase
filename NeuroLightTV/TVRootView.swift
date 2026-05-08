@@ -22,6 +22,7 @@ import SwiftUI
 struct TVRootView: View {
     @AppStorage(StorageKey.hasSeenOnboarding) private var hasSeenOnboarding: Bool = false
     @State private var presentingConfig: SessionConfig? = nil
+    @Bindable private var bus = AutomationBus.shared
 
     var body: some View {
         ZStack {
@@ -29,6 +30,20 @@ struct TVRootView: View {
             content
         }
         .preferredColorScheme(.dark)
+        .onChange(of: bus.requestedSession) { _, cfg in
+            // The DEBUG automation surface drives sessions from the Mac
+            // (used for screenshot capture and verification). Mirror the
+            // iOS ContentView pattern: set the local presenting state,
+            // then clear the request flag.
+            guard let cfg = cfg else { return }
+            presentingConfig = cfg
+            DispatchQueue.main.async {
+                bus.requestedSession = nil
+            }
+        }
+        .onChange(of: bus.dismissTicket) { _, _ in
+            presentingConfig = nil
+        }
     }
 
     @ViewBuilder
