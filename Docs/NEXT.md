@@ -3,6 +3,36 @@
 
 ---
 
+## 1.0 — SHIPPED to App Store (May 2026) ✅
+
+## 2.0 — In progress (May 2026)
+
+Four substantive features, all structurally complete and code-verified:
+- PRISM (rename of Psychedelic — one syllable, less loaded)
+- DRIFT (audio-only psychoacoustic, three layers, real-time AVAudioSourceNode synthesis with sine LUT for render-callback efficiency)
+- BLOOM (DRIFT audio + responsive Canvas bloom that breathes / drifts / shimmers with the audio LFOs)
+- Apple TV target (six-tile home, focus navigation, full-bleed session, single bundle ID with iOS so the App Store treats it as one listing)
+
+Mark hardware-verified DRIFT and BLOOM on iPhone 16 Plus + AirPods (May 7 evening): "incredibly beautiful and sound amazing." BLOOM's visual movement subsequently amplified per his feedback (radius range ±0.15 → ±0.25, opacity range ±0.075 → ±0.15, plus a new ±5% center drift tied to the phase-drift LFO).
+
+**Remaining 2.0 work before submission:**
+- tvOS sim screenshots (after tvOS 26.4 SDK install completed)
+- Real Apple TV verification (Mark)
+- App Store screenshot pipeline extension for tvOS
+- Doc updates: HISTORY, HANDOFF, MEMORY, CLAUDE.md
+- AM-rate decision for DRIFT/BLOOM (provisional 8 Hz)
+- App Store Connect: 2.0 metadata + new screenshots + Add Platform → tvOS + submit
+
+## 3.0 — Mark's running idea list (captured May 7 from on-device test)
+
+These are noted, not committed. Strategic Claude and Mark to refine when 2.0 is in the rearview.
+
+- **Adventure further into layer math** — sonically AND visually. The two-layer-on-by-default Drift was the conservative cut. There's a much weirder space to explore: more carriers, more LFO interactions, more cross-modulation between audio LFOs and visual generators.
+- **Interference patterns as a visual mode** — Mark's lifelong fascination with moiré-style interference (originally black-and-white, but reskinned to fit the warm trippy aesthetic). Concentric warm rings overlapping at slightly different spatial frequencies, producing slow visible moiré that pulses with the audio. Visually compatible with the existing identity. Conceptually it's the *visual* analog of what Layer 3 already does *acoustically* (interference between detuned carriers producing audible beats). Could be its own state in Advanced — call it RIPPLE, MOIRE, INTERFERE, or something better.
+- **Possible biofeedback / ADAPTIVE revisit** — only if a path to real validation appears (pilot user group, academic collaborator). N=1 self-experimentation was deliberately deferred indefinitely. Architecture remains documented in `Docs/PurePhase2.0Spec.md` if it ever returns.
+
+---
+
 ## Engine Layer — DONE (Session 2, May 2026)
 ## Core Views — DONE (Session 3, May 2026)
 ## HTTP Automation + Polish — DONE (Session 4, May 2026)

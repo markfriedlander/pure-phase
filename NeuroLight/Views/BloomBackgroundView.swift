@@ -69,15 +69,20 @@ struct BloomBackgroundView: View {
         let shimmerOn     = driftState.layerHarmonicShimmer
 
         // ---- Layer 1: Breathing Carrier → radius + opacity ----
-        // sin(2π × phase) ∈ [-1, 1] → scale 0.85↔1.15, opacity 0.925↔1.0
+        // sin(2π × phase) ∈ [-1, 1] → scale 0.75↔1.25, opacity 0.70↔1.0.
+        // Range tuned wider after Mark's first-listen feedback — the
+        // ±0.15 / ±0.075 of the initial cut was too restrained on a
+        // phone screen; ±0.25 / ±0.15 reads as obvious breath without
+        // ever feeling busy.
         let breathSin = sin(2 * .pi * breathPhase)
-        let radiusScale  = 1.00 + 0.15 * breathSin
-        let bloomOpacity = (0.925 + 0.075 * breathSin) * envelope
+        let radiusScale  = 1.00 + 0.25 * breathSin
+        let bloomOpacity = (0.85 + 0.15 * breathSin) * envelope
 
-        // ---- Layer 2: Phase Drift → color palette interpolation ----
+        // ---- Layer 2: Phase Drift → color palette + center drift ----
         // Two warm palettes — amber-leaning at drift = 0, red-leaning
         // at drift = π. sin(2π × phase) maps to colorMix ∈ [0, 1].
         let driftSin = sin(2 * .pi * driftPhase)
+        let driftCos = cos(2 * .pi * driftPhase)
         let colorMix = (driftSin + 1) / 2
 
         let core  = lerp(amberCore,  redCore,  colorMix)
@@ -88,7 +93,17 @@ struct BloomBackgroundView: View {
         // the bloom always fills the viewport on any device shape.
         let baseRadius = max(size.width, size.height) * 0.6
         let radius = baseRadius * radiusScale
-        let center = CGPoint(x: size.width / 2, y: size.height / 2)
+
+        // Center drift: the bloom slowly traces a small horizontal
+        // figure (driven by the same drift LFO that moves the audio
+        // between the ears) so the visual field has perceptible motion
+        // without ever being fast enough to read as flicker. ±5% of the
+        // shorter screen dimension on each axis — gentle, not erratic.
+        let driftRadius = min(size.width, size.height) * 0.05
+        let center = CGPoint(
+            x: size.width  / 2 + driftSin * driftRadius,
+            y: size.height / 2 + driftCos * driftRadius * 0.4
+        )
 
         // First wash: black background. Ensures the radial bloom edge
         // bleeds to true black, not the system background.
