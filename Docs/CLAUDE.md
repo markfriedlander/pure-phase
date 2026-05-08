@@ -47,10 +47,13 @@ HANDOFF_BRIEF.md gets updated at the end of every meaningful work session. HISTO
 **6. Flag uncertainty before building.**
 If something in the spec is unclear, ask. If two approaches are equally valid and the choice matters, present them and ask. Confident wrong implementations are more expensive than clarifying questions.
 
-**7. The documents are ground truth.**
+**7. Zero warnings policy.**
+Compiler warnings are not acceptable in committed code. Fix every warning. Do not suppress warnings with flags, pragmas, or `// swiftlint:disable` comments. If a warning genuinely cannot be fixed — due to a third-party dependency or an Apple framework issue outside our control — document exactly why in a code comment and bring it to Mark for explicit approval before leaving it in place. Suppressing a warning to make the build look clean is not a fix. This rule has no exceptions without Mark's explicit approval.
+
+**8. The documents are ground truth.**
 When code and documents disagree, the code gets fixed. When you are uncertain about scope or direction, the spec wins. When the spec is silent, ask Mark.
 
-**8. Ask before inventing.**
+**9. Ask before inventing.**
 If something isn't specified, don't invent it. Ask. This is especially important for: UI layout details, audio parameters, animation specifics, and anything touching the breath guide.
 
 ---
