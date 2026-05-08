@@ -48,6 +48,8 @@ struct IntentTileView: View {
         case "theta":       return "Theta — 6 hertz, advanced"
         case "smr":         return "SMR — 13.5 hertz, advanced"
         case "prism":       return "PRISM — 8 hertz, advanced"
+        case "drift":       return "DRIFT — psychoacoustic audio, advanced"
+        case "bloom":       return "BLOOM — psychoacoustic audio with responsive visuals, advanced"
         case "void":        return "Void — half hertz, experimental"
         case "custom":      return "Custom — user-defined frequency, advanced"
         default:            return state.displayName

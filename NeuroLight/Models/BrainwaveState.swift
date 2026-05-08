@@ -134,6 +134,44 @@ extension BrainwaveState {
         carrierHz: 180.0
     )
 
+    // DRIFT (new in 2.0). Audio-only psychoacoustic mode — black screen,
+    // three layers (Breathing Carrier, Phase Drift, Harmonic Shimmer)
+    // synthesized in real time via AVAudioSourceNode. No flicker, no
+    // torch. The `hz` field carries the isochronic AM rate, which is
+    // provisional at 8.0 Hz pending design resolution — the 2.0 spec
+    // doesn't fully pin this. `driftEnabled: false` here means the
+    // ±20% Hz wobble does NOT apply (DRIFT has its own, much slower,
+    // carrier-frequency LFO instead — handled in DriftAudioEngine).
+    // See Docs/PurePhase2.0Spec.md for full design.
+    static let drift = BrainwaveState(
+        id: "drift",
+        displayName: "DRIFT",
+        hz: 8.0,
+        description: "Audio-only psychoacoustic experience. Best with headphones.",
+        evidenceTier: .advanced,
+        sessionTint: SessionTint(startHex: 0xC0392B, endHex: 0x1A0503),
+        allowTorch: false,
+        driftEnabled: false,
+        carrierHz: 220.0
+    )
+
+    // BLOOM (new in 2.0). Same audio engine as DRIFT, plus a slow
+    // generative visual layer driven by the audio synthesis state
+    // (LFO phases). Non-stroboscopic. The flagship Apple TV experience.
+    // Visual rendering lives in BLOOMSessionView; audio is identical
+    // to DRIFT (same DriftAudioEngine + DriftSynthesisState).
+    static let bloom = BrainwaveState(
+        id: "bloom",
+        displayName: "BLOOM",
+        hz: 8.0,
+        description: "Audio plus slow responsive visuals. Best with headphones.",
+        evidenceTier: .advanced,
+        sessionTint: SessionTint(startHex: 0xF5A623, endHex: 0xC0392B),
+        allowTorch: false,
+        driftEnabled: false,
+        carrierHz: 220.0
+    )
+
     static let voidState = BrainwaveState(
         id: "void",
         displayName: "VOID",
@@ -175,7 +213,7 @@ extension BrainwaveState {
     )
 
     static let primary: [BrainwaveState] = [.focus, .calm, .sleep]
-    static let advanced: [BrainwaveState] = [.theta, .smr, .prism, .voidState, .custom]
+    static let advanced: [BrainwaveState] = [.theta, .smr, .prism, .drift, .bloom, .voidState, .custom]
     static let all: [BrainwaveState] = primary + advanced + [.breathwork]
 
     static func state(forID id: String) -> BrainwaveState? {

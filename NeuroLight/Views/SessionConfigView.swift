@@ -421,6 +421,8 @@ struct SessionConfigView: View {
         case "theta":       return "sparkles"
         case "smr":         return "circle.dotted"
         case "prism":       return "swirl.circle.righthalf.filled"
+        case "drift":       return "waveform"
+        case "bloom":       return "sun.max"
         case "void":        return "circle"
         case "breathwork":  return "wind"
         default:            return "slider.horizontal.3"
