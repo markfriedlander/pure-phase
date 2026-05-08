@@ -18,7 +18,7 @@ struct HomeView: View {
         ZStack {
             Color.black.ignoresSafeArea()
 
-            ScrollView(.vertical, showsIndicators: false) {
+            CenteredScrollContainer {
                 VStack(spacing: 0) {
                     RoundedRectangle(cornerRadius: 0.5)
                         .fill(LinearGradient(
@@ -66,8 +66,6 @@ struct HomeView: View {
                     .padding(.top, 16)
                     .padding(.bottom, 36)
                 }
-                .frame(maxWidth: Layout.contentMaxWidth)
-                .frame(maxWidth: .infinity)
             }
         }
         .toolbar(.hidden, for: .navigationBar)

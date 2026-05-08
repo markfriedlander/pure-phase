@@ -63,7 +63,7 @@ struct SessionConfigView: View {
         ZStack {
             Color.black.ignoresSafeArea()
 
-            ScrollView(showsIndicators: false) {
+            CenteredScrollContainer {
                 VStack(spacing: 28) {
                     Image(systemName: glyphFor(state))
                         .font(.system(size: 44, weight: .ultraLight))
@@ -130,8 +130,6 @@ struct SessionConfigView: View {
                     .padding(.bottom, 32)
                     .accessibilityIdentifier("config.restoreDefaults")
                 }
-                .frame(maxWidth: Layout.contentMaxWidth)
-                .frame(maxWidth: .infinity)
             }
         }
         .navigationBarTitleDisplayMode(.inline)

@@ -43,7 +43,7 @@ nonisolated struct SessionTint: Hashable, Codable {
 }
 
 extension Color {
-    init(hex: UInt32) {
+    nonisolated init(hex: UInt32) {
         let r = Double((hex >> 16) & 0xFF) / 255.0
         let g = Double((hex >> 8) & 0xFF) / 255.0
         let b = Double(hex & 0xFF) / 255.0
@@ -177,8 +177,11 @@ extension BrainwaveState {
         all.first { $0.id == id }
     }
 
-    var isBreathwork: Bool { id == "breathwork" }
-    var isCustom: Bool { id == "custom" }
+    // These are pure value-type checks — explicitly nonisolated so they
+    // can be called from any context (including the nonisolated autoclosures
+    // used in `SessionConfig.needsAudio`).
+    nonisolated var isBreathwork: Bool { id == "breathwork" }
+    nonisolated var isCustom: Bool { id == "custom" }
 
     /// For Custom state, returns a copy with the user's stored Hz and
     /// carrier. For all others, returns self unchanged.

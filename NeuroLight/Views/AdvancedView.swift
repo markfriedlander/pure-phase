@@ -18,7 +18,7 @@ struct AdvancedView: View {
         ZStack {
             Color.black.ignoresSafeArea()
 
-            ScrollView(.vertical, showsIndicators: false) {
+            CenteredScrollContainer {
                 VStack(spacing: 0) {
                     RoundedRectangle(cornerRadius: 0.5)
                         .fill(LinearGradient(
@@ -64,8 +64,6 @@ struct AdvancedView: View {
 
                     Spacer(minLength: 36)
                 }
-                .frame(maxWidth: Layout.contentMaxWidth)
-                .frame(maxWidth: .infinity)
             }
         }
         .navigationBarTitleDisplayMode(.inline)
