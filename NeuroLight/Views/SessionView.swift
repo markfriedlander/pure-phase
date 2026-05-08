@@ -36,13 +36,17 @@ struct SessionView: View {
 
     var body: some View {
         let state = config.state
-        let breathOnly = state.isBreathwork
+        // Breath-style rendering covers BREATHWORK, DRIFT, and BLOOM —
+        // no flicker, prominent ring, soft halo. BLOOM additionally
+        // gets a responsive Canvas behind the ring (not yet wired —
+        // see Docs/PurePhase2.0Spec.md §3).
+        let breathOnly = state.usesBreathStyleRendering
 
         ZStack {
             Color.black.ignoresSafeArea()
 
-            // ENTRAINMENT FLICKER LAYER — only when not breath-only.
-            if !breathOnly {
+            // ENTRAINMENT FLICKER LAYER — only when this state has flicker.
+            if state.hasFlicker {
                 Group {
                     if config.colorModeEnabled {
                         state.sessionTint.gradient

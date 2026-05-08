@@ -225,6 +225,28 @@ extension BrainwaveState {
     // used in `SessionConfig.needsAudio`).
     nonisolated var isBreathwork: Bool { id == "breathwork" }
     nonisolated var isCustom: Bool { id == "custom" }
+    nonisolated var isDrift: Bool { id == "drift" }
+    nonisolated var isBloom: Bool { id == "bloom" }
+
+    /// True if this state uses the stroboscopic flicker layer in its
+    /// session view. False for BREATHWORK (breath ring only), DRIFT
+    /// (audio only, black canvas), and BLOOM (audio + responsive
+    /// canvas, no stroboscopic flicker). Used by SessionView to decide
+    /// whether to render the entrainment color/gradient layer.
+    nonisolated var hasFlicker: Bool { !(isBreathwork || isDrift || isBloom) }
+
+    /// True if this state should use breathwork-style rendering — no
+    /// flicker, prominent breath ring, soft halo. BREATHWORK, DRIFT,
+    /// and BLOOM all share this rendering style (BLOOM additionally
+    /// gets the responsive canvas layer behind the ring).
+    nonisolated var usesBreathStyleRendering: Bool {
+        isBreathwork || isDrift || isBloom
+    }
+
+    /// True if this state should be powered by the new DRIFT/BLOOM
+    /// real-time audio engine (DriftAudioEngine.swift) rather than the
+    /// 1.0 buffer-based AudioEngine. SessionEngine routes accordingly.
+    nonisolated var usesDriftAudioEngine: Bool { isDrift || isBloom }
 
     /// For Custom state, returns a copy with the user's stored Hz and
     /// carrier. For all others, returns self unchanged.

@@ -55,7 +55,13 @@ final class SessionEngine {
     // MARK: Owned sub-engines
 
     let audio = AudioEngine()
+    let driftAudio = DriftAudioEngine()
     let torch = TorchController()
+
+    /// True when the active session uses the DRIFT/BLOOM audio engine
+    /// rather than the 1.0 buffer-based AudioEngine. Set once at start
+    /// based on the session config's state.
+    private var usingDriftAudio: Bool = false
 
     // MARK: Internal state
 
@@ -100,11 +106,37 @@ final class SessionEngine {
         self.lastTorchPhase = false
         self.isRunning = true
 
-        // Start the AudioEngine if ANY audio layer is wanted — isochronic
-        // tone, ambient texture, or breathwork cues. Earlier this gated
-        // only on `audioEnabled` (the iso flag), which silently broke
-        // breathwork mode where iso is off but cues should still play.
-        if config.needsAudio {
+        // Audio engine selection. DRIFT and BLOOM use the new real-time
+        // synthesis engine (DriftAudioEngine.swift); everything else
+        // uses the 1.0 buffer-based AudioEngine.
+        //
+        // TODO(2.0): The DriftAudioEngine render callback is currently
+        // too slow for the iOS simulator's audio thread budget — the
+        // simulator aborts the process with "Cleanup: RPC timeout.
+        // Apparently deadlocked." after a few seconds. Real-device
+        // performance is unverified. Until the render-callback
+        // optimization lands (sin lookup table + phase-accumulator
+        // pattern + reduced per-sample work), DRIFT and BLOOM run
+        // SILENTLY — the visual experience works (black canvas /
+        // breath ring / no flicker) but no audio plays. The engine
+        // wiring is in place; the math just needs to be fast enough.
+        usingDriftAudio = config.state.usesDriftAudioEngine
+        if usingDriftAudio {
+            // Intentionally NOT calling driftAudio.start here — see
+            // TODO above. Restore once the render callback is optimized.
+            // driftAudio.start(
+            //     carrierHz: config.state.carrierHz,
+            //     isochronicHz: config.state.hz,
+            //     layerBreathingCarrier: true,
+            //     layerPhaseDrift: true,
+            //     layerHarmonicShimmer: false
+            // )
+        } else if config.needsAudio {
+            // Start the 1.0 AudioEngine if ANY audio layer is wanted —
+            // isochronic tone, ambient texture, or breathwork cues.
+            // Earlier this gated only on `audioEnabled` (the iso flag),
+            // which silently broke breathwork mode where iso is off but
+            // cues should still play.
             audio.start(config: config)
         }
 
@@ -118,6 +150,8 @@ final class SessionEngine {
         displayLink = nil
         torch.forceOff()
         audio.stop()
+        driftAudio.stop()
+        usingDriftAudio = false
         isRunning = false
         isPaused = false
         flickerPhase = false
@@ -141,7 +175,11 @@ final class SessionEngine {
         displayLink = nil
         torch.forceOff()
         lastTorchPhase = false
-        audio.pauseForInterruption()
+        if usingDriftAudio {
+            driftAudio.pauseForInterruption()
+        } else {
+            audio.pauseForInterruption()
+        }
         flickerPhase = false
         brightness = 0
         isPaused = true
@@ -156,7 +194,11 @@ final class SessionEngine {
         let link = CADisplayLink(target: self, selector: #selector(tick))
         link.add(to: .main, forMode: .common)
         displayLink = link
-        audio.resumeFromInterruption()
+        if usingDriftAudio {
+            driftAudio.resumeFromInterruption()
+        } else {
+            audio.resumeFromInterruption()
+        }
         isPaused = false
     }
 
@@ -223,8 +265,13 @@ final class SessionEngine {
             remaining = nil
         }
 
-        // Push fade envelope to audio (Float volume on the mixer).
-        audio.setEnvelope(brightness)
+        // Push fade envelope to whichever audio engine is active.
+        // Float volume on the mixer; same value drives both engines.
+        if usingDriftAudio {
+            driftAudio.setEnvelope(brightness)
+        } else {
+            audio.setEnvelope(brightness)
+        }
 
         // Drive the torch only on edges (avoid hammering the hardware).
         if config.torchEnabled && torch.isAvailable {

@@ -138,7 +138,11 @@ final class DriftAudioEngine {
 
     private let engine = AVAudioEngine()
     private let mixer = AVAudioMixerNode()
-    private let sampleRate: Double = 48_000
+    // 44100 matches both the iOS simulator default and the 1.0
+    // AudioEngine. Forcing 48000 was causing iOS audio system
+    // resampling overhead that pushed the source-node render
+    // callback into overload on the simulator.
+    private let sampleRate: Double = 44_100
 
     private var mainCarrierNode: AVAudioSourceNode?
     private var shimmerLowNode:  AVAudioSourceNode?
@@ -190,11 +194,33 @@ final class DriftAudioEngine {
             attachShimmer(format: stereoFmt)
         }
 
-        do {
-            try engine.start()
-            isRunning = true
-        } catch {
-            isRunning = false
+        // TODO(2.0): The render callback below is too slow for the iOS
+        // simulator's audio thread budget — it overloads and the audio
+        // system aborts with "Cleanup: RPC timeout. Apparently
+        // deadlocked." Per-sample work currently includes 3-4 sin/cos
+        // calls + a ring-buffer linear interpolation, ~90 k math ops
+        // per render block at 44.1 kHz × 512 frames. Needs at least:
+        //   - Phase-accumulator pattern instead of sin(2π × f × t)
+        //     (avoids precision loss AND eliminates the divide)
+        //   - Sine lookup table (1024 entries linearly interpolated;
+        //     cheaper than libm sin on the audio thread)
+        //   - Possibly vDSP_vsma / vForce for vectorized batches
+        // Real-device performance may differ — A18 cores are much
+        // faster than the simulator's audio emulation. Verify on
+        // device before committing to a specific optimization.
+        // For now, the engine is wired but the actual audio start is
+        // disabled so DRIFT/BLOOM sessions run silently. The
+        // architectural skeleton is correct; this is a tuning gap.
+        let kEnableActualAudio = false
+        if kEnableActualAudio {
+            do {
+                try engine.start()
+                isRunning = true
+            } catch {
+                isRunning = false
+            }
+        } else {
+            isRunning = true   // pretend, so SessionEngine flow continues
         }
     }
 
@@ -209,6 +235,25 @@ final class DriftAudioEngine {
         shimmerLowNode = nil
         shimmerHighNode = nil
         isRunning = false
+    }
+
+    /// Drive the master mixer's outputVolume from SessionEngine's fade
+    /// envelope (0.0 → 1.0 fade-in over 3 s; 1.0 → 0.0 fade-out over
+    /// 30 s). Called per CADisplayLink tick.
+    func setEnvelope(_ envelope: Double) {
+        mixer.outputVolume = Float(envelope)
+    }
+
+    /// Pause for AVAudioSession interruption (phone call etc.).
+    /// SessionEngine coordinates pause/resume across audio + flicker
+    /// + torch.
+    func pauseForInterruption() {
+        engine.pause()
+    }
+
+    /// Resume from interruption. Best-effort restart.
+    func resumeFromInterruption() {
+        do { try engine.start() } catch { /* best-effort */ }
     }
 
     /// Toggle Layer 3 (harmonic shimmer) at runtime. Attaching/detaching
