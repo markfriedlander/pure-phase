@@ -15,13 +15,18 @@ Four substantive features, all structurally complete and code-verified:
 
 Mark hardware-verified DRIFT and BLOOM on iPhone 16 Plus + AirPods (May 7 evening): "incredibly beautiful and sound amazing." BLOOM's visual movement subsequently amplified per his feedback (radius range ±0.15 → ±0.25, opacity range ±0.075 → ±0.15, plus a new ±5% center drift tied to the phase-drift LFO).
 
-**Remaining 2.0 work before submission:**
-- tvOS sim screenshots (after tvOS 26.4 SDK install completed)
-- Real Apple TV verification (Mark)
-- App Store screenshot pipeline extension for tvOS
-- Doc updates: HISTORY, HANDOFF, MEMORY, CLAUDE.md
-- AM-rate decision for DRIFT/BLOOM (provisional 8 Hz)
-- App Store Connect: 2.0 metadata + new screenshots + Add Platform → tvOS + submit
+**Done in evening Session 8:**
+- tvOS sim screenshots captured at 4K (Docs/AppStoreScreenshots/tv-4k/)
+- Real Apple TV pairing tried, failed, deferred to App Store auto-install
+- AirPlay verified as a working "free" path (screen mirroring works without code changes)
+
+**Remaining 2.0 work before submission (queued for next session):**
+
+1. **TV graphics** — generate the three layered icon assets (Back / Middle / Front for parallax) plus the Top Shelf hero image (1920×720). CC to adapt the existing iOS app icon code into three layers. Plan agreed; ~1 hr.
+2. **AirPlay route picker in session view** — `AVRoutePickerView` embedded in `SessionView` so the user can route audio/screen without leaving the app. Not a blocker (Control Center mirroring works today) but a nice polish. ~1 hr.
+3. **Optional: `scripts/capture_screenshots.sh` tvOS extension** — driving the tvOS sim from the existing screenshot pipeline so future submissions are one-command. ~1 hr.
+4. **Resolve open question: isochronic AM rate for DRIFT/BLOOM** — provisional 8 Hz. Worth a deliberate Strategic Claude conversation before submitting.
+5. **App Store Connect submission**: 2.0 metadata update, upload iOS + tvOS binaries, Add Platform → tvOS on existing listing, attach screenshots, submit. Same flow as 1.0; see `Docs/AppStoreSubmission.md` for gotchas.
 
 ## 3.0 — Mark's running idea list (captured May 7 from on-device test)
 

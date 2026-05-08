@@ -306,3 +306,70 @@ Mark surfaced this during App Store Connect submission for 1.0. The big-screen-i
 
 ### Closed-loop biofeedback entrainment (Apple Watch)
 Apple exposes real-time heart rate streaming to third-party apps via HealthKit during active workout sessions, typically at 1-second resolution. A future version of Pure Phase could use incoming HR and HRV data to modulate flicker frequency and audio in real time — nudging toward Alpha if HR is elevated, holding at target state as HRV improves. The breath guide could adjust its pacing dynamically to meet the user rather than imposing a fixed rhythm. This is closed-loop neurofeedback. It is the right direction for a 2.0 but explicitly out of scope for v1.
+
+---
+
+## 2.0 architectural decisions (May 7-8, 2026)
+
+### Two audio engines, not one
+
+**Decision:** keep the existing `AudioEngine` (buffer-based via `AVAudioPlayerNode`) for FOCUS / CALM / SLEEP / PRISM / BREATHWORK / Theta / SMR / Void / Custom. Add a separate `DriftAudioEngine` (real-time per-sample synthesis via `AVAudioSourceNode`) for DRIFT and BLOOM. `SessionEngine` selects which engine to start based on `state.usesDriftAudioEngine`.
+
+**Rationale:** DRIFT's three layers can't be expressed as a pre-generated buffer. Layer 1 (Breathing Carrier ±4 Hz) modulates the carrier frequency continuously over a 24 s LFO cycle — a static buffer can't do this without periodic regeneration that would introduce audible artifacts. Layer 2 (Phase Drift) needs a per-sample variable delay that also can't be baked into a fixed loop. Real-time synthesis is the only honest path.
+
+**Alternative considered:** unify everything onto `AVAudioSourceNode`. Rejected because the buffer-based path has months of tuning behind it (loop-boundary zero crossings, breath cue scheduling, audio interruption recovery) and is bit-identical to what shipped in 1.0. Adding a new engine alongside is far less risky than rewriting the working one.
+
+### `@unchecked Sendable` for cross-thread synthesis state
+
+**Decision:** `DriftSynthesisState` is a `final class @unchecked Sendable` with naked `Double` and `Bool` fields. The audio render thread writes the LFO phases at sample rate; the main thread reads them at display refresh rate (for BLOOM's visual layer). No locks.
+
+**Rationale:** the audio render thread runs at real-time priority and cannot block, lock, or allocate. Word-aligned 64-bit Double stores are atomic at the hardware level on all Apple silicon and modern Intel — they can't tear mid-write. The values are slow LFO phases (sub-Hz); a one-frame stale read at 60-120 Hz display refresh is invisible to the user. Swift's strict concurrency model is more conservative than the hardware reality, so `@unchecked Sendable` documents that the safety argument is hardware-level rather than language-level. Rationale comment is in the source above the class declaration.
+
+**Alternative considered:** `os_unfair_lock`-protected struct read from the main thread, called per frame. Rejected as unnecessary overhead and a guaranteed concurrency-debate magnet for future readers.
+
+### Sine LUT + phase accumulator over libm `sin`
+
+**Decision:** the audio render callback uses a 4096-entry sine lookup table (one-time file-scoped init, ~16 KB, linearly interpolated) instead of libm `sin()`. Per-oscillator phase is accumulated via `phase += f / sr; phase -= floor(phase)` rather than computed from `sin(2π × f × t)`.
+
+**Rationale:** the first DRIFT implementation used libm `sin` × 4 calls per sample at 44.1 kHz × 512 samples per render block. The iOS simulator's audio thread overloaded ("Cleanup: RPC timeout. Apparently deadlocked.") within seconds. The LUT path is roughly 10–30× faster per call. Phase accumulation also avoids the precision drift that `sin(2π × f × t)` accumulates over long sessions (a 1-hour 220 Hz session feeds sin() arguments north of 1.4 million where Double precision frays). cos derives from the same LUT via `cos(2π × p) = sin(2π × (p + 0.25))` — no separate cosine table.
+
+### BLOOM via SwiftUI `Canvas`, not Metal
+
+**Decision:** BLOOM's responsive visual layer is a SwiftUI `TimelineView(.animation)` driving a `Canvas` that draws a single radial gradient with parameters modulated by the audio LFO state.
+
+**Rationale:** `MeshGradient` (the simpler API) is iOS 18+; our deployment floor is iOS 17. `Canvas` with manual gradient drawing is iOS 16+ and supports radial gradients via `GraphicsContext.fill(_:with:)`. The per-frame work is one gradient + an optional thin stroke ring — well within the iOS 17 floor device's budget. If a future deployment target falls below this we'd escalate to a Metal pass; not a 2.0 concern.
+
+### tvOS source-sharing via PBXFileSystemSynchronizedRootGroup + `#if os(iOS)`
+
+**Decision:** the tvOS target shares the iOS target's source folder (`NeuroLight/`) via a second entry in the tvOS target's `fileSystemSynchronizedGroups`. Files that are iOS-only (HomeView, AdvancedView, SessionConfigView, SessionView, OnboardingView, TileGesture, ContentView, NeuroLightApp) are wrapped at file scope with `#if os(iOS) ... #endif`. Cross-platform code (engine, models, audio, BloomBackgroundView, BreathGuideView, GradientProgressRing, IntentTileView) compiles into both targets unchanged.
+
+**Rationale:** Xcode's PBXFileSystemSynchronizedRootGroup auto-discovers files added to a folder on disk — no pbxproj surgery needed when we add new files. Sharing the iOS folder with the tvOS target via a second sync-group reference is a one-line pbxproj edit (vs. a per-file `targetMembership` exception set, which would be many lines and fragile). File-scoped `#if os(iOS)` guards are clean and discoverable; tvOS-only behavior lives entirely in `NeuroLightTV/`.
+
+**Alternative considered:** extracting all shared code into a Swift Package Manager local package. Rejected as over-engineering for a project this small. The synchronized-group approach works fine.
+
+### Single bundle ID across iOS and tvOS
+
+**Decision:** both `NeuroLight` (iOS) and `NeuroLightTV` (tvOS) targets use `PRODUCT_BUNDLE_IDENTIFIER = com.MarkFriedlander.PurePhase`. Apple aggregates them into one App Store listing via "Add Platform → tvOS" rather than spawning a separate app entry.
+
+**Rationale:** Mark's previous app got accidentally split into two App Store entries because the iOS and tvOS bundle IDs were different. We won't repeat that. Apple's modern multi-platform policy explicitly allows the same bundle ID across iOS / iPadOS / tvOS targets. The user sees one Pure Phase listing that says "iPhone, iPad, Apple TV" in the platform list.
+
+### tvOS deployment floor at 17.0, not 16.0
+
+**Decision:** `TVOS_DEPLOYMENT_TARGET = 17.0`. Mark's bedroom Apple TV (HD 4th gen, 2015) is capped at tvOS 16 and won't be able to install Pure Phase. His living room Apple TV (4K 2nd gen, 2021) supports tvOS 17+ and is fine.
+
+**Rationale:** the engine layer (SessionEngine, AudioEngine, DriftAudioEngine, AutomationBus) uses `@Observable` extensively. `@Observable` is iOS 17 / tvOS 17 only. Backporting to tvOS 16 means rewriting all of those to use the older `ObservableObject` / `@Published` API and updating every `@Bindable` site to `@ObservedObject` — 4-6 hours of careful work with real risk of subtle regressions to the working iOS app currently in the App Store. The bedroom-TV use case (~1 specific device) doesn't justify the risk. Mark accepted the trade.
+
+**Mitigation for the bedroom TV:** AirPlay screen mirroring from the iPhone Pure Phase app to the bedroom Apple TV works today via Control Center → Screen Mirroring. Zero-code path covers the projector use case despite the missing tvOS install.
+
+### TV is lean-back: defaults only, no settings UI
+
+**Decision:** the tvOS app shows six tiles (BREATHE / FOCUS / CALM / SLEEP / DRIFT / BLOOM) and nothing else. No Advanced panel. No long press. No config screen. Single click to start a session with the user's saved settings (or hardcoded defaults if no iPhone has tuned them).
+
+**Rationale:** Strategic Claude's spec § 4 was explicit about this and CC agreed. The iPhone is the lean-forward configuration surface; the TV is the lean-back consumption surface. Adding configuration UI to the TV would dilute both. PRISM, Theta, SMR, Void, Custom are not surfaced on TV in 2.0 — only the primary trio plus the two psychoacoustic modes (DRIFT and BLOOM) where TV is the killer venue.
+
+### Layer 4 sub-threshold pulse: dropped
+
+**Decision:** Strategic Claude's spec proposed a Layer 4 (sub-threshold pulse at -24 dB). CC pushed back during the spec review and Mark agreed to drop it.
+
+**Rationale:** -24 dB is not sub-threshold — it's roughly 1/16 perceived loudness, clearly audible as a sustained tone in a quiet room. The framing ("auditory system detects it without consciously resolving it") is borderline pseudoscience. Either it does something audible (in which case call it that and don't lie about its mechanism) or it does nothing (in which case why ship it). Three layers is plenty. Dropping the fourth keeps the marketing copy honest.
+

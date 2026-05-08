@@ -5,7 +5,7 @@
 
 ## What This Project Is
 
-Pure Phase is a free iOS app that uses synchronized light flicker, isochronic audio tones, and breath pacing to guide users into specific mental states — focus, calm, and sleep. It is a science-grounded tool, not a wellness content platform. There is no narration, no subscriptions, no accounts, no content library. Think: Lumenate, but free, minimal, and honest about what it is.
+Pure Phase is a free iOS and tvOS app that uses synchronized light flicker, isochronic audio tones, breath pacing, and (in 2.0) responsive psychoacoustic audio + visuals to guide users toward focus, calm, sleep, breathwork, or psychoacoustic states. It is a science-grounded tool, not a wellness content platform. There is no narration, no subscriptions, no accounts, no content library, no data collection. Think: Lumenate, but free, minimal, and honest about what it is. 1.0 is live in the App Store (May 2026); 2.0 (DRIFT, BLOOM, Apple TV) is built and awaiting submission.
 
 The aesthetic is dark and atmospheric — inspired by the William Gibson "Virtual Light" book cover. Warm amber-to-red spectrum light on near-total black. Sparse. Industrial headers, soft body text, slow deliberate motion.
 
@@ -75,8 +75,14 @@ Light and audio pulses must be phase-aligned from the same clock source. If they
 **Prefer clarity over cleverness.**
 This codebase will be read and extended. Name things for what they are. Structure follows the file architecture in the spec.
 
-**iOS 26 with Mac Catalyst.**
-All legacy `#if os(macOS)` AppKit branches are removed. This is an iOS 26+ app, primarily iPhone, that also runs on Mac via Mac Catalyst (presents as if it were an iPad). No native AppKit code. Catalyst-specific behavior, when needed, uses `#if targetEnvironment(macCatalyst)` — not `#if os(macOS)`.
+**iOS 17 floor + tvOS 17 floor (as of 2.0).**
+This is a SwiftUI app with two targets that share a single `com.MarkFriedlander.PurePhase` bundle ID:
+- `NeuroLight` (iOS) — primary target, iPhone first, iPad layout via the same target. Apple Silicon Macs run the iOS binary natively via "iPhone & iPad Apps on Mac" (no Catalyst target — that was tried and stripped during 2.0 hygiene).
+- `NeuroLightTV` (tvOS) — added in 2.0. Six-tile lean-back UI. Same bundle ID = single App Store listing.
+
+Source-shared via Xcode synchronized folder groups. iOS-only views (HomeView, AdvancedView, SessionConfigView, SessionView, OnboardingView, TileGesture, ContentView, NeuroLightApp) wrapped at file scope with `#if os(iOS)`. tvOS-specific views live in `NeuroLightTV/`. Engine, models, audio, and shared display components compile to both targets unchanged. See `Docs/MEMORY.md` "tvOS source-sharing" decision for details.
+
+Do not introduce new Catalyst code. Do not introduce new `#if os(macOS)` branches. The few remaining `#if !targetEnvironment(macCatalyst)` guards in source are inert (Catalyst flag is off in the project) but kept rather than ripped out — minor cleanup deferred.
 
 ---
 

@@ -3,7 +3,57 @@
 
 ---
 
-## Current State — May 2026 (post Session 4)
+## Current State — May 8, 2026 (1.0 in App Store; 2.0 build complete, awaiting submission)
+
+**Pure Phase 1.0 is LIVE on the App Store.** Submitted late May 7, approved overnight, currently downloadable. The product is real.
+
+**Pure Phase 2.0 is structurally complete.** All four planned features (PRISM rename, DRIFT audio-only psychoacoustic mode, BLOOM responsive-visual mode, Apple TV target) are coded, building clean, hardware-verified on iPhone, sim-verified on Apple TV. **17 commits ahead of origin/main** since 1.0 shipped — push when ready.
+
+### What 2.0 contains (all committed since `64e58aa`):
+
+| Feature | Status |
+|---|---|
+| **PRISM rename** (was Psychedelic) | Done — single syllable, less loaded App Store optics, behavior bit-identical |
+| **DRIFT** — audio-only psychoacoustic mode | Done. Real-time `AVAudioSourceNode` synthesis with sine LUT + phase accumulators. Three layers: Breathing Carrier (±4 Hz over 24 s), Phase Drift (delay-based stereo rotation over 40 s), Harmonic Shimmer (±1 Hz detuned carriers, opt-in). Black session canvas + breath ring + soft halo. |
+| **BLOOM** — DRIFT audio + responsive visuals | Done. SwiftUI `TimelineView` + `Canvas` reads `DriftSynthesisState` LFO phases at frame rate and renders a slow generative radial bloom whose radius/opacity/color/center all evolve with the audio. Movement parameters tuned per Mark's iPhone-test feedback (radius ±25%, opacity ±15%, ±5% center drift tied to phase-drift LFO). Breath ring rides at 0.6 opacity. |
+| **Shared DRIFT/BLOOM config** | Done. New section in `SessionConfigView` for state.usesDriftAudioEngine — three layer toggles, carrier slider, "Best with headphones" subtitle, ambient picker visibly disabled with "DRIFT replaces ambient texture" copy. |
+| **Apple TV target** | Done. `NeuroLightTV` target shares same bundle ID `com.MarkFriedlander.PurePhase` so App Store treats both as one listing. Source-shared via `PBXFileSystemSynchronizedRootGroup` plus `#if os(iOS)` guards on iOS-only views. New TV-specific files: `TVRootView`, `TVHomeView`, `TVTileButton`, `TVOnboardingView`, `TVSessionView`. Six tiles (BREATHE/FOCUS/CALM/SLEEP/DRIFT/BLOOM), focus-based navigation, full-bleed session, defaults-only (no Advanced, no config UI on TV — TV is lean-back). |
+| **Hygiene cleanup** | Zero build warnings (Swift 6 actor-isolation fixes). Vertical centering for big screens. Photosensitive copy includes bystander warning. Catalyst flag stripped. App Review Notes pre-filled in App Store Connect. |
+| **TV screenshots captured at 4K** | Done. `Docs/AppStoreScreenshots/tv-4k/` — home + DRIFT + 2 BLOOM stills. 3840×2160. Ready for App Store upload (gitignored — local only). |
+
+### Hardware verification status
+
+- **iPhone 16 Plus + AirPods** — Mark hand-tested DRIFT and BLOOM evening of May 7. Quote: "incredibly beautiful and sound amazing." Acoustic phase drift between ears confirmed. BLOOM movement subsequently amplified per his ask.
+- **Apple TV simulator** — captured 4K screenshots. Audio plays through Mac speakers (unintentional but useful as audio-path verification).
+- **Apple TV physical device** — ❌ pairing failed. Mark tried both his TVs; bedroom is tvOS-16-capped (Apple TV HD 4th gen, 2015) and won't run our tvOS-17-floor build; living room (4K 2nd gen, 2021) wouldn't show "Developer" toggle in Settings even after Xcode poke. Decision: ship anyway; living room TV will install via App Store auto-install once 2.0 is approved. Bedroom won't get Pure Phase until hardware upgrade or a tvOS 16 backport (declined — would require rewriting all `@Observable` engines, 4-6 hr risk to working iOS code).
+
+### How to drive a fresh CC session here
+
+1. Read `Docs/CLAUDE.md` (operational rules).
+2. Read this file (HANDOFF_BRIEF.md).
+3. Read `Docs/PurePhase2.0Spec.md` and `Docs/PurePhase2.0_CC_PreBuildResponse.md` for the architectural decisions that shape 2.0.
+4. Read `Docs/NEXT.md` for what's queued.
+5. The 1.0 submission recovery doc is `Docs/AppStoreSubmission.md` — historical now, but useful if a future submission hits the same Apple-review patterns (it will).
+
+### What's left for 2.0 (deferred to next session — not blocked, just sequenced)
+
+- **TV graphics** — App Icon (layered: Back/Middle/Front for parallax), App Icon for App Store listing, Top Shelf "hero" image. CC can generate these programmatically by adapting the existing iOS app icon code into three layers (back = black, middle = bloom, front = bright core) plus a 1920×720 top-shelf composition. Plan agreed with Mark; execution scheduled for tomorrow.
+- **AirPlay route picker in session view** — `AVRoutePickerView` embedded in `SessionView` so users route audio/screen to TV/speakers without going to Control Center. Mark's existing iPhone can already AirPlay-mirror the BLOOM experience to his Apple TV via Control Center → Screen Mirroring (zero-code path); the in-app picker is polish. ~1 hour.
+- **Optional: extend `scripts/capture_screenshots.sh` to also cover tvOS** so future submissions don't need manual sim driving.
+- **Open design question: isochronic AM rate for DRIFT/BLOOM** — provisional 8 Hz, spec was ambiguous. Worth a deliberate decision with Strategic Claude before 2.0 submits.
+- **App Store Connect submission paperwork** — version 2.0 metadata update (add DRIFT/BLOOM/TV mentions), upload binaries (iOS + tvOS), Add Platform → tvOS on the existing app, attach screenshots, submit. Same flow as 1.0 — see `Docs/AppStoreSubmission.md` for the gotchas (especially the silent "items required" check).
+
+### What 2.0 explicitly does NOT include
+
+- Apple Watch companion (deferred — tabled when biofeedback was deferred)
+- Biofeedback / ADAPTIVE / heart rate features (deferred indefinitely — N=1 self-experimentation can't generate the validation Mark would want before publishing)
+- iCloud sync (explicitly excluded — would change "Data Not Collected" privacy story)
+- Layer 4 sub-threshold pulse (dropped — pseudoscience framing, CC pushed back during spec review)
+- BLOOM visual intensity knob (deferred to 2.1 if user feedback demands)
+
+---
+
+## Historical state — May 7, 2026 (post 1.0 submission, pre 2.0)
 
 **Status: Tap bug fixed. Onboarding fonts bumped. Landscape reflow handled. HTTP automation server live and working. Full flow drivable from curl: tap any tile, change any setting, start a session with a full config, observe live engine telemetry, exit. Both iOS Simulator and Mark's iPhone 16 Plus running the new build.**
 
