@@ -1,4 +1,11 @@
 // ========== BLOCK 27: SessionConfigView (custom + breathwork) - START ==========
+
+// iOS-only view. The tvOS target shares this folder via a
+// PBXFileSystemSynchronizedRootGroup but uses its own UI in
+// NeuroLightTV/. The #if guard prevents tvOS compile errors
+// from APIs (Slider, UIImpactFeedbackGenerator, navigation
+// bar modifiers, etc.) that are iOS-only on this codebase.
+#if os(iOS)
 //
 //  SessionConfigView.swift
 //  NeuroLight
@@ -563,4 +570,5 @@ struct SessionConfigView: View {
         )
     }
 }
+#endif
 // ========== BLOCK 27: SessionConfigView (custom + breathwork) - END ==========

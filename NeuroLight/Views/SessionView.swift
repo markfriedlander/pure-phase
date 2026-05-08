@@ -1,4 +1,11 @@
 // ========== BLOCK 28: SessionView (breathwork branch + cues) - START ==========
+
+// iOS-only view. The tvOS target shares this folder via a
+// PBXFileSystemSynchronizedRootGroup but uses its own UI in
+// NeuroLightTV/. The #if guard prevents tvOS compile errors
+// from APIs (Slider, UIImpactFeedbackGenerator, navigation
+// bar modifiers, etc.) that are iOS-only on this codebase.
+#if os(iOS)
 //
 //  SessionView.swift
 //  NeuroLight
@@ -253,4 +260,5 @@ private struct PrismHueModifier: ViewModifier {
         }
     }
 }
+#endif
 // ========== BLOCK 28: SessionView (breathwork branch + cues) - END ==========

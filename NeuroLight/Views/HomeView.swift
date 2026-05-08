@@ -1,4 +1,11 @@
 // ========== BLOCK 24: HomeView (tap=start, long-press=config) - START ==========
+
+// iOS-only view. The tvOS target shares this folder via a
+// PBXFileSystemSynchronizedRootGroup but uses its own UI in
+// NeuroLightTV/. The #if guard prevents tvOS compile errors
+// from APIs (Slider, UIImpactFeedbackGenerator, navigation
+// bar modifiers, etc.) that are iOS-only on this codebase.
+#if os(iOS)
 //
 //  HomeView.swift
 //  NeuroLight
@@ -115,4 +122,5 @@ struct HomeView: View {
         }
     }
 }
+#endif
 // ========== BLOCK 24: HomeView (tap=start, long-press=config) - END ==========

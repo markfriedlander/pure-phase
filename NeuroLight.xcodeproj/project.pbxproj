@@ -7,10 +7,16 @@
 	objects = {
 
 /* Begin PBXFileReference section */
+		85184AC82FAD9C6600A8A6EF /* NeuroLightTV.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NeuroLightTV.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		85AA5EE62E333EC300005FE8 /* NeuroLight.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NeuroLight.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		85184AC92FAD9C6600A8A6EF /* NeuroLightTV */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = NeuroLightTV;
+			sourceTree = "<group>";
+		};
 		85AA5EE82E333EC300005FE8 /* NeuroLight */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = NeuroLight;
@@ -19,6 +25,13 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		85184AC52FAD9C6600A8A6EF /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		85AA5EE32E333EC300005FE8 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -33,6 +46,7 @@
 			isa = PBXGroup;
 			children = (
 				85AA5EE82E333EC300005FE8 /* NeuroLight */,
+				85184AC92FAD9C6600A8A6EF /* NeuroLightTV */,
 				85AA5EE72E333EC300005FE8 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -41,6 +55,7 @@
 			isa = PBXGroup;
 			children = (
 				85AA5EE62E333EC300005FE8 /* NeuroLight.app */,
+				85184AC82FAD9C6600A8A6EF /* NeuroLightTV.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -48,6 +63,29 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		85184AC72FAD9C6600A8A6EF /* NeuroLightTV */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 85184AD02FAD9C6900A8A6EF /* Build configuration list for PBXNativeTarget "NeuroLightTV" */;
+			buildPhases = (
+				85184AC42FAD9C6600A8A6EF /* Sources */,
+				85184AC52FAD9C6600A8A6EF /* Frameworks */,
+				85184AC62FAD9C6600A8A6EF /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				85184AC92FAD9C6600A8A6EF /* NeuroLightTV */,
+				85AA5EE82E333EC300005FE8 /* NeuroLight */,
+			);
+			name = NeuroLightTV;
+			packageProductDependencies = (
+			);
+			productName = NeuroLightTV;
+			productReference = 85184AC82FAD9C6600A8A6EF /* NeuroLightTV.app */;
+			productType = "com.apple.product-type.application";
+		};
 		85AA5EE52E333EC300005FE8 /* NeuroLight */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 85AA5EF12E333EC600005FE8 /* Build configuration list for PBXNativeTarget "NeuroLight" */;
@@ -77,9 +115,12 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 2600;
+				LastSwiftUpdateCheck = 2640;
 				LastUpgradeCheck = 2600;
 				TargetAttributes = {
+					85184AC72FAD9C6600A8A6EF = {
+						CreatedOnToolsVersion = 26.4.1;
+					};
 					85AA5EE52E333EC300005FE8 = {
 						CreatedOnToolsVersion = 26.0;
 					};
@@ -100,11 +141,19 @@
 			projectRoot = "";
 			targets = (
 				85AA5EE52E333EC300005FE8 /* NeuroLight */,
+				85184AC72FAD9C6600A8A6EF /* NeuroLightTV */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		85184AC62FAD9C6600A8A6EF /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		85AA5EE42E333EC300005FE8 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -115,6 +164,13 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		85184AC42FAD9C6600A8A6EF /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		85AA5EE22E333EC300005FE8 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -125,6 +181,68 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
+		85184AD12FAD9C6900A8A6EF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = "App Icon & Top Shelf Image";
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = FBUNBDS7R7;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UIUserInterfaceStyle = Automatic;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.MarkFriedlander.PurePhase;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = appletvos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 3;
+				TVOS_DEPLOYMENT_TARGET = 17.0;
+			};
+			name = Debug;
+		};
+		85184AD22FAD9C6900A8A6EF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = "App Icon & Top Shelf Image";
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = FBUNBDS7R7;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UIUserInterfaceStyle = Automatic;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.MarkFriedlander.PurePhase;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = appletvos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 3;
+				TVOS_DEPLOYMENT_TARGET = 17.0;
+			};
+			name = Release;
+		};
 		85AA5EEF2E333EC600005FE8 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -317,6 +435,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		85184AD02FAD9C6900A8A6EF /* Build configuration list for PBXNativeTarget "NeuroLightTV" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				85184AD12FAD9C6900A8A6EF /* Debug */,
+				85184AD22FAD9C6900A8A6EF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		85AA5EE12E333EC300005FE8 /* Build configuration list for PBXProject "NeuroLight" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

@@ -6,6 +6,13 @@
 //  Root router. Owns the navigation stack and the session presentation
 //  so the debug AutomationBus can drive the whole app from one place.
 //
+//  iOS-only — the tvOS target provides its own ContentView in
+//  NeuroLightTV/ContentView.swift with focus-based navigation and a
+//  reduced tile set. Sharing this file across both targets would cause
+//  a duplicate type name; the #if guard keeps each platform clean.
+//
+
+#if os(iOS)
 
 import SwiftUI
 
@@ -105,4 +112,6 @@ struct ContentView: View {
 }
 
 #Preview { ContentView() }
+
+#endif
 // ========== BLOCK 21: ContentView (router with automation bus) - END ==========

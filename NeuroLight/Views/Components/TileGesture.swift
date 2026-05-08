@@ -1,4 +1,11 @@
 // ========== BLOCK 30: TileGesture (Button + simultaneous LongPress) - START ==========
+
+// iOS-only view. The tvOS target shares this folder via a
+// PBXFileSystemSynchronizedRootGroup but uses its own UI in
+// NeuroLightTV/. The #if guard prevents tvOS compile errors
+// from APIs (Slider, UIImpactFeedbackGenerator, navigation
+// bar modifiers, etc.) that are iOS-only on this codebase.
+#if os(iOS)
 //
 //  TileGesture.swift
 //  NeuroLight
@@ -81,4 +88,5 @@ private struct TilePressStyle: ButtonStyle {
             .animation(.easeInOut(duration: 0.18), value: configuration.isPressed)
     }
 }
+#endif
 // ========== BLOCK 30: TileGesture (Button + simultaneous LongPress) - END ==========

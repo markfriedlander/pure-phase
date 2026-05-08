@@ -1,4 +1,11 @@
 // ========== BLOCK 10: OnboardingView - START ==========
+
+// iOS-only view. The tvOS target shares this folder via a
+// PBXFileSystemSynchronizedRootGroup but uses its own UI in
+// NeuroLightTV/. The #if guard prevents tvOS compile errors
+// from APIs (Slider, UIImpactFeedbackGenerator, navigation
+// bar modifiers, etc.) that are iOS-only on this codebase.
+#if os(iOS)
 //
 //  OnboardingView.swift
 //  NeuroLight
@@ -134,4 +141,5 @@ struct OnboardingView: View {
         }
     }
 }
+#endif
 // ========== BLOCK 10: OnboardingView - END ==========
