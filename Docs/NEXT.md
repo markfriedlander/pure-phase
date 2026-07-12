@@ -5,6 +5,19 @@
 
 ## 1.0 — SHIPPED to App Store (May 2026) ✅
 
+## 2.0 — Submitted (May 2026)
+
+- **iOS 2.0 (1)** — approved by Apple, Ready for Distribution.
+- **tvOS 2.0 (2)** — Waiting for Review after a Guideline 2.3.8 rejection of 2.0 (1). Root cause: the `NeuroLightTV` Xcode target had no `INFOPLIST_KEY_CFBundleDisplayName` override, so the on-device home-tile label rendered the internal target name "NeuroLightTV" instead of "Pure Phase." Fix: added `INFOPLIST_KEY_CFBundleDisplayName = "Pure Phase"` to both tvOS Debug and Release configs; bumped tvOS `CURRENT_PROJECT_VERSION` from 1 → 2; re-archived, re-uploaded, swapped the build in the rejected submission, cleared Missing Compliance, and resubmitted.
+
+## 2.0.1 — Cleanup queue (post-approval)
+
+Not blockers; do not start any of this until tvOS 2.0 has been approved and both platforms are live in the App Store.
+
+1. **Internal NeuroLight → Pure Phase rename.** The customer-facing rename (display name, listing, Pages site, GitHub repo) was done before 1.0, but the internal codebase still says "NeuroLight" everywhere: Xcode project name (`NeuroLight.xcodeproj`), targets (`NeuroLight`, `NeuroLightTV`), schemes, source folder names (`NeuroLight/`, `NeuroLightTV/`), Swift filenames (`NeuroLightApp.swift`, `NeuroLightTVApp.swift`). This naming gap is what caused the tvOS 2.0 (1) rejection — the missing display name override defaulted to the internal target name. Rename surgery in Xcode is tedious (pbxproj edits, scheme regeneration, folder moves, Git history churn) and exactly the wrong thing to do mid-submission. Tackle as a deliberate session post-approval.
+2. **Swift 6 strict-concurrency warnings in `SessionEngine.swift`.** Two warnings (capture of `self` in concurrently-executing code; capture of non-Sendable `Notification` in a `@Sendable` closure). Visible to Xcode but not blocking — Apple does not reject for compiler warnings. Fix per the zero-warnings policy in CLAUDE.md.
+3. **Inert `#if !targetEnvironment(macCatalyst)` guards.** Catalyst was stripped from the project during 2.0 hygiene; the remaining guards are dead code. Remove or leave per preference.
+
 ## 2.0 — In progress (May 2026)
 
 Four substantive features, all structurally complete and code-verified:
