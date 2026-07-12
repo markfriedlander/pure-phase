@@ -1,29 +1,159 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Pure Phase</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pure Phase · Breathe. Focus. Calm. Sleep.</title>
+<meta name="description" content="Pure Phase is a free iPhone app that uses synchronized light, sound, and breath to guide you into focus, calm, or sleep. On-device, no accounts, no data collection.">
+<link rel="icon" href="assets/favicon-32.png">
 <style>
-:root { color-scheme: dark; --bg: #000; --text: #fff; --muted: #888480; --warm-1: #F5A623; --warm-2: #E8593C; --warm-3: #C0392B; }
-html, body { margin:0; padding:0; background:var(--bg); color:var(--text); font-family:-apple-system,"SF Pro Text",sans-serif; }
-.wrap { max-width:560px; margin:0 auto; padding:96px 28px; text-align:center; }
-.bar { width:180px; height:1.5px; background:linear-gradient(90deg,var(--warm-1),var(--warm-2),var(--warm-3)); margin:0 auto 24px; }
-h1 { font-weight:700; font-size:24px; letter-spacing:10px; margin:0 0 12px; }
-.sub { font-size:11px; letter-spacing:4px; color:var(--muted); text-transform:lowercase; margin-bottom:48px; }
-nav a { display:block; margin:18px 0; color:var(--warm-1); font-size:12px; letter-spacing:5px; text-transform:uppercase; text-decoration:none; }
-nav a:hover { color:var(--warm-2); }
+  :root {
+    --bg: #0a0705;
+    --surface: #17110c;
+    --text: #f0e7dd;
+    --muted: #9a8b7d;
+    --accent: #e8a23c;        /* the amber ring */
+    --accent-glow: #f5c878;
+    --border: #291f17;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 18px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* A warm amber wash from the top, the icon's light opened into the page. */
+  body {
+    background:
+      radial-gradient(ellipse 85% 55% at 50% 7%,
+                      rgba(232, 130, 60, 0.13) 0%,
+                      rgba(232, 130, 60, 0.00) 60%),
+      var(--bg);
+    min-height: 100vh;
+  }
+
+  main { max-width: 720px; margin: 0 auto; padding: 4rem 1.5rem 3rem; }
+
+  .hero { text-align: center; padding: 2rem 0 3rem; }
+
+  .hero-icon {
+    display: inline-block;
+    width: 168px; height: 168px;
+    border-radius: 38px;
+    overflow: hidden;
+    margin-bottom: 2rem;
+    box-shadow: 0 0 60px rgba(232, 130, 60, 0.28), 0 8px 24px rgba(0, 0, 0, 0.55);
+  }
+  .hero-icon img { width: 100%; height: 100%; display: block; }
+
+  .wordmark { font-size: 2.75rem; font-weight: 500; letter-spacing: 0.01em; margin-bottom: 0.5rem; }
+  .tagline { font-style: italic; font-size: 1.15rem; color: var(--accent); letter-spacing: 0.01em; }
+
+  .lead {
+    font-size: 1.2rem; line-height: 1.55; text-align: center;
+    max-width: 37rem; margin: 0 auto 3.5rem; font-weight: 300;
+  }
+
+  .features { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.25rem; margin: 3rem 0; }
+  @media (max-width: 540px) { .features { grid-template-columns: 1fr; } }
+
+  .feature { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 1.5rem 1.25rem; }
+  .feature h3 { font-size: 1.05rem; font-weight: 500; color: var(--accent); margin-bottom: 0.6rem; }
+  .feature p { font-size: 0.95rem; line-height: 1.55; margin: 0; font-weight: 300; }
+
+  .closing {
+    text-align: center; margin: 4rem 0 2.5rem; padding: 2.5rem 1rem;
+    border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+  }
+  .closing p { font-style: italic; font-size: 1.4rem; font-weight: 300; }
+
+  .safety {
+    max-width: 37rem; margin: 0 auto; text-align: center;
+    font-size: 0.85rem; color: var(--muted); line-height: 1.6;
+  }
+
+  a { color: var(--accent); text-decoration: none; transition: color 0.15s ease; }
+  a:hover { color: var(--accent-glow); text-decoration: underline; }
+
+  footer {
+    margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--border);
+    text-align: center; font-size: 0.9rem; color: var(--muted); line-height: 1.9;
+  }
+  footer a { color: var(--accent); }
+  footer .sep { color: var(--border); padding: 0 0.4rem; }
 </style>
 </head>
 <body>
-<div class="wrap">
-  <div class="bar"></div>
-  <h1>PURE PHASE</h1>
-  <div class="sub">light · sound · breath</div>
-  <nav>
-    <a href="privacy.html">Privacy Policy</a>
-    <a href="support.html">Support</a>
-  </nav>
-</div>
+  <main>
+
+    <section class="hero">
+      <div class="hero-icon">
+        <img src="assets/purephase-icon-512.png" alt="Pure Phase app icon, a warm amber ring glowing on black.">
+      </div>
+      <h1 class="wordmark">Pure Phase</h1>
+      <p class="tagline">Breathe. Focus. Calm. Sleep.</p>
+    </section>
+
+    <p class="lead">
+      Synchronized light, sound, and breath, tuned to guide you into focus, calm, or sleep.
+      Tap to begin. Hold to tune. That is the whole interface.
+    </p>
+
+    <section class="features">
+
+      <div class="feature">
+        <h3>Four states</h3>
+        <p>Breathe for breathwork, Focus at 40 Hz, Calm at 10 Hz, Sleep at 2 Hz. Each pairs a gentle light flicker with a matching audio pulse.</p>
+      </div>
+
+      <div class="feature">
+        <h3>Sound from nothing</h3>
+        <p>Every tone is generated on your device in real time. A warm carrier pulses at the target frequency, synchronized frame by frame with the light. No audio files.</p>
+      </div>
+
+      <div class="feature">
+        <h3>Guided breath</h3>
+        <p>A breathing ring paces Coherence, 4-7-8, Box, and Slow Wave patterns, or build your own. No flicker, just the breath.</p>
+      </div>
+
+      <div class="feature">
+        <h3>DRIFT and BLOOM</h3>
+        <p>For headphones. DRIFT builds depth and slow movement from pure tones, no flicker at all. BLOOM adds a generative field of light that breathes and shifts color with the sound.</p>
+      </div>
+
+      <div class="feature">
+        <h3>Torch for sleep</h3>
+        <p>Sleep can pulse your iPhone's torch through closed eyelids, screen dimmed, for eyes-closed entrainment.</p>
+      </div>
+
+      <div class="feature">
+        <h3>Yours, and free</h3>
+        <p>Free. No subscription, no account, no narration, no streaks, no ads, and no data collection of any kind.</p>
+      </div>
+
+    </section>
+
+    <div class="closing">
+      <p>Light, sound, and breath, in phase.</p>
+    </div>
+
+    <p class="safety">
+      Pure Phase uses rhythmic light pulses. Do not use it if you are photosensitive or have a
+      history of epilepsy or seizures. It is not a medical device and makes no medical claims.
+      See <a href="support.html">Support</a> for full guidance.
+    </p>
+
+    <footer>
+      <a href="https://apps.apple.com/us/app/pure-phase/id6767311034">App Store</a><span class="sep">·</span><a href="privacy.html">Privacy</a><span class="sep">·</span><a href="support.html">Support</a><span class="sep">·</span><a href="https://github.com/markfriedlander/pure-phase">Source</a><span class="sep">·</span><a href="index.html">Home</a><span class="sep">·</span>© 2026 <a href="https://markfriedlander.github.io/">Mark Friedlander</a>
+    </footer>
+
+  </main>
 </body>
 </html>

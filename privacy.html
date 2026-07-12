@@ -1,102 +1,114 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Pure Phase — Privacy Policy</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Privacy · Pure Phase</title>
+<meta name="description" content="Pure Phase collects no data. Everything runs and stays on your device.">
+<link rel="icon" href="assets/favicon-32.png">
 <style>
-:root {
-  color-scheme: dark;
-  --bg: #000;
-  --text: #ffffff;
-  --muted: #888480;
-  --warm-1: #F5A623;
-  --warm-2: #E8593C;
-  --warm-3: #C0392B;
-}
-* { box-sizing: border-box; }
-html, body {
-  margin: 0;
-  padding: 0;
-  background: var(--bg);
-  color: var(--text);
-  font-family: -apple-system, "SF Pro Text", "Helvetica Neue", sans-serif;
-  font-size: 17px;
-  line-height: 1.6;
-  -webkit-font-smoothing: antialiased;
-}
-.wrap {
-  max-width: 560px;
-  margin: 0 auto;
-  padding: 64px 28px 96px;
-}
-.bar {
-  width: 180px;
-  height: 1.5px;
-  background: linear-gradient(90deg, var(--warm-1), var(--warm-2), var(--warm-3));
-  margin: 0 auto 24px;
-  border-radius: 1px;
-}
-h1 {
-  font-family: -apple-system, "SF Pro Display", sans-serif;
-  font-weight: 700;
-  font-size: 22px;
-  letter-spacing: 8px;
-  text-align: center;
-  margin: 0 0 6px;
-}
-.sub {
-  text-align: center;
-  font-size: 12px;
-  letter-spacing: 4px;
-  color: var(--muted);
-  text-transform: lowercase;
-  margin-bottom: 56px;
-}
-h2 {
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 5px;
-  color: var(--muted);
-  text-transform: uppercase;
-  margin: 40px 0 14px;
-}
-p {
-  color: rgba(255,255,255,0.92);
-  margin: 0 0 18px;
-}
-.muted { color: var(--muted); }
-a { color: var(--warm-1); text-decoration: none; }
-a:hover { color: var(--warm-2); }
-.foot {
-  margin-top: 64px;
-  font-size: 12px;
-  letter-spacing: 2px;
-  color: var(--muted);
-  text-align: center;
-}
+  :root {
+    --bg: #0a0705;
+    --surface: #17110c;
+    --text: #f0e7dd;
+    --muted: #9a8b7d;
+    --accent: #e8a23c;
+    --accent-glow: #f5c878;
+    --border: #291f17;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 18px;
+    line-height: 1.7;
+    font-weight: 300;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background:
+      radial-gradient(ellipse 85% 55% at 50% 6%,
+                      rgba(232, 130, 60, 0.11) 0%,
+                      rgba(232, 130, 60, 0.00) 60%),
+      var(--bg);
+    min-height: 100vh;
+  }
+
+  main { max-width: 640px; margin: 0 auto; padding: 3.5rem 1.5rem 3rem; }
+
+  .brand {
+    display: flex; align-items: center; gap: 1rem;
+    padding-bottom: 1.5rem; margin-bottom: 2.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .brand-icon {
+    width: 56px; height: 56px; border-radius: 13px; overflow: hidden; flex-shrink: 0;
+    display: block;
+    box-shadow: 0 0 24px rgba(232, 130, 60, 0.20), 0 2px 8px rgba(0, 0, 0, 0.45);
+  }
+  .brand-icon img { width: 100%; height: 100%; display: block; }
+  .brand-text { flex: 1; }
+  .app-name { font-size: 0.95rem; color: var(--accent); letter-spacing: 0.04em; margin-bottom: 0.2rem; }
+  .app-name a { color: inherit; text-decoration: none; }
+  .app-name a:hover { color: var(--accent-glow); text-decoration: none; }
+  .page-title { font-size: 2rem; font-weight: 500; letter-spacing: -0.01em; line-height: 1.15; }
+
+  .doc p { margin-bottom: 1.3rem; }
+
+  h2 {
+    font-size: 0.8rem; font-weight: 600; color: var(--accent);
+    text-transform: uppercase; letter-spacing: 0.12em;
+    margin: 2.75rem 0 0.9rem;
+  }
+
+  a { color: var(--accent); text-decoration: none; transition: color 0.15s ease; }
+  a:hover { color: var(--accent-glow); text-decoration: underline; }
+
+  footer {
+    margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--border);
+    text-align: center; font-size: 0.9rem; color: var(--muted); line-height: 1.9;
+  }
+  footer a { color: var(--accent); }
+  footer .sep { color: var(--border); padding: 0 0.4rem; }
 </style>
 </head>
 <body>
-<div class="wrap">
-  <div class="bar"></div>
-  <h1>PURE PHASE</h1>
-  <div class="sub">privacy policy</div>
+  <main>
 
-  <p>Pure Phase does not collect, store, transmit, or share any personal data of any kind.</p>
+    <header class="brand">
+      <a class="brand-icon" href="index.html">
+        <img src="assets/purephase-icon-512.png" alt="Pure Phase icon">
+      </a>
+      <div class="brand-text">
+        <p class="app-name"><a href="index.html">Pure Phase</a></p>
+        <h1 class="page-title">Privacy</h1>
+      </div>
+    </header>
 
-  <p>All session activity — including your chosen states, breath patterns, audio settings, and session duration preferences — is stored exclusively on your device using Apple's standard local storage. Nothing leaves your device. There are no servers, no accounts, no analytics, no tracking, and no third-party SDKs.</p>
+    <div class="doc">
+      <p>Pure Phase does not collect, store, transmit, or share any personal data of any kind.</p>
 
-  <p>The app does not access your camera, microphone, contacts, location, or health data. The flashlight (torch) feature accesses your device's camera hardware only to control the torch light — no image or video data is captured or processed.</p>
+      <p>All session activity, including your chosen states, breath patterns, audio settings, and session-duration preferences, is stored exclusively on your device using Apple's standard local storage. Nothing leaves your device. There are no servers, no accounts, no analytics, no tracking, and no third-party SDKs.</p>
 
-  <p>Pure Phase is free, contains no advertising, and has no commercial relationship with any third party that would involve your data.</p>
+      <p>The app does not access your camera, microphone, contacts, location, or health data. The flashlight (torch) feature accesses your device's camera hardware only to control the torch light. No image or video data is captured or processed.</p>
 
-  <h2>Contact</h2>
-  <p>For questions or feedback:<br>
-  Mark Friedlander<br>
-  <a href="mailto:markfriedlander@yahoo.com">markfriedlander@yahoo.com</a></p>
+      <p>Pure Phase is free, contains no advertising, and has no commercial relationship with any third party that would involve your data.</p>
 
-  <div class="foot">last updated · may 2026</div>
-</div>
+      <h2>Contact</h2>
+      <p>For questions or feedback:<br>
+      Mark Friedlander<br>
+      <a href="mailto:markfriedlander@yahoo.com">markfriedlander@yahoo.com</a></p>
+    </div>
+
+    <footer>
+      <a href="https://apps.apple.com/us/app/pure-phase/id6767311034">App Store</a><span class="sep">·</span><a href="privacy.html">Privacy</a><span class="sep">·</span><a href="support.html">Support</a><span class="sep">·</span><a href="https://github.com/markfriedlander/pure-phase">Source</a><span class="sep">·</span><a href="index.html">Home</a><span class="sep">·</span>© 2026 <a href="https://markfriedlander.github.io/">Mark Friedlander</a>
+    </footer>
+
+  </main>
 </body>
 </html>
